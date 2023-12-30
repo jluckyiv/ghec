@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
@@ -33,12 +31,7 @@ var strengthenCmd = &cobra.Command{
 	Use:   "strengthen",
 	Short: "Add strengthen",
 	Run: func(_ *cobra.Command, _ []string) {
-		e := ghec.
-			NewEnhancement(ghec.EnhanceStrengthen).
-			WithMultipleTarget(numTargets).
-			WithLevel(ghec.Level(level)).
-			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("Add strengthen costs %d", e.Cost())
+		run(ghec.EnhanceStrengthen, "Add strengthen")
 	},
 }
 

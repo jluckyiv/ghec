@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
@@ -33,12 +31,7 @@ var immobilizeCmd = &cobra.Command{
 	Use:   "immobilize",
 	Short: "Add immobilize",
 	Run: func(_ *cobra.Command, _ []string) {
-		e := ghec.
-			NewEnhancement(ghec.EnhanceImmobilize).
-			WithMultipleTarget(numTargets).
-			WithLevel(ghec.Level(level)).
-			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("Add immobilize costs %d", e.Cost())
+		run(ghec.EnhanceImmobilize, "Add immobilize")
 	},
 }
 

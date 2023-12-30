@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
@@ -33,12 +31,7 @@ var retaliateCmd = &cobra.Command{
 	Use:   "retaliate",
 	Short: "Add retaliate",
 	Run: func(_ *cobra.Command, _ []string) {
-		e := ghec.
-			NewEnhancement(ghec.EnhanceRetaliate).
-			WithMultipleTarget(numTargets).
-			WithLevel(ghec.Level(level)).
-			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("Add retaliate costs %d", e.Cost())
+		run(ghec.EnhanceRetaliate, "Add retaliate")
 	},
 }
 

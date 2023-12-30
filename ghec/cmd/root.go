@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -44,6 +45,16 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) {
 	// },
+}
+
+// run is a helper function for the subcommands, which are similar.
+func run(be ghec.BaseEnhancement, desc string) {
+	e := ghec.
+		NewEnhancement(be).
+		WithMultipleTarget(numTargets).
+		WithLevel(ghec.Level(level)).
+		WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
+	fmt.Printf("%s costs %d", desc, e.Cost())
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

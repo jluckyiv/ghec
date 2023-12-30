@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
@@ -33,12 +31,7 @@ var summonsMoveCmd = &cobra.Command{
 	Use:   "move",
 	Short: "Increase summons move",
 	Run: func(_ *cobra.Command, _ []string) {
-		e := ghec.
-			NewEnhancement(ghec.EnhanceSummonsMove).
-			WithMultipleTarget(numTargets).
-			WithLevel(ghec.Level(level)).
-			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("Increase summons move costs %d", e.Cost())
+		run(ghec.EnhanceSummonsMove, "Increase summons move")
 	},
 }
 

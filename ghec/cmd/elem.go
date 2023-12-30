@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
@@ -31,21 +29,18 @@ import (
 // elemCmd represents the elem command
 var elemCmd = &cobra.Command{
 	Use:   "elem",
-	Short: "Add specific element",
+	Short: "Add element",
+	Long: `
+    Default behavior calculates cost for adding a specific element.
+    Use the --any or -a flag for enhancement to add any element.
+    `,
 	Run: func(cmd *cobra.Command, _ []string) {
 		any, _ := cmd.Flags().GetBool("any")
-		enh := ghec.EnhanceSpecificElement
-		desc := "specific"
 		if any {
-			enh = ghec.EnhanceAnyElement
-			desc = "any"
+			run(ghec.EnhanceAnyElement, "Add any element")
+		} else {
+			run(ghec.EnhanceSpecificElement, "Add specific element")
 		}
-		e := ghec.
-			NewEnhancement(enh).
-			WithMultipleTarget(numTargets).
-			WithLevel(ghec.Level(level)).
-			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("Add %s element costs %d", desc, e.Cost())
 	},
 }
 
