@@ -6,6 +6,9 @@ import (
 	"github.com/jluckyiv/ghec"
 )
 
+// TestEnhanceFromExample tests the example from the README
+// and the Gloomhaven rules. Haven't had time to write a
+// proper test suite.
 func TestEnhanceFromExample(t *testing.T) {
 	input := ghec.NewEnhancement(
 		ghec.EnhanceAttack).
@@ -26,17 +29,4 @@ func TestEnhanceFromExample(t *testing.T) {
 	if actual != ghec.Cost(191) {
 		t.Fatalf("Expected 191, got %d", actual)
 	}
-
-	// ...
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
 }
