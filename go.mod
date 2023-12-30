@@ -1,4 +1,4 @@
-module github.com/jluckyiv/ghuc
+module github.com/jluckyiv/ghec
 
 go 1.21.5
 
