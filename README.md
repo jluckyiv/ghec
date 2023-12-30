@@ -26,7 +26,7 @@ I like the convenience of a CLI, which I can run while using
 Install using `go install`:
 
 ```sh
-go install github.com/jluckyiv/ghec@latest
+go install github.com/jluckyiv/ghec/ghec@latest
 ```
 
 I don't anticipate other people using this CLI, so I'm not publishing
