@@ -54,7 +54,9 @@ func run(be ghec.BaseEnhancement, desc string) {
 		WithMultipleTarget(numTargets).
 		WithLevel(ghec.Level(level)).
 		WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-	fmt.Printf("%s costs %d", desc, e.Cost())
+	cost, err := e.Cost()
+	cobra.CheckErr(err)
+	fmt.Printf("%s costs %d", desc, cost)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
