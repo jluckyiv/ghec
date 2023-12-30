@@ -22,25 +22,42 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+
+	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
 
-// summonsCmd represents the summons command
-var summonsCmd = &cobra.Command{
-	Use:   "summons",
+// hpCmd represents the hp command
+var hpCmd = &cobra.Command{
+	Use:   "hp",
 	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		e := ghec.
+			NewEnhancement(ghec.EnhanceSummonsHP).
+			WithMultipleTarget(numTargets).
+			WithLevel(ghec.Level(level)).
+			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
+		fmt.Printf("add summons hp costs %d", e.Cost())
+	},
 }
 
 func init() {
-	rootCmd.AddCommand(summonsCmd)
+	summonsCmd.AddCommand(hpCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// summonsCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// hpCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// summonsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// hpCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
