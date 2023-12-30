@@ -31,7 +31,7 @@ import (
 // targetCmd represents the target command
 var targetCmd = &cobra.Command{
 	Use:   "target",
-	Short: "Add additional target",
+	Short: "Add target",
 	Run: func(cmd *cobra.Command, args []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceTarget).
