@@ -26,8 +26,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rangeCmd represents the range command
-var rangeCmd = &cobra.Command{
+// summonsRangeCmd represents the range command
+var summonsRangeCmd = &cobra.Command{
 	Use:   "range",
 	Short: "Increase summons range",
 	Run: func(_ *cobra.Command, _ []string) {
@@ -36,7 +36,7 @@ var rangeCmd = &cobra.Command{
 }
 
 func init() {
-	summonsCmd.AddCommand(rangeCmd)
+	summonsCmd.AddCommand(summonsRangeCmd)
 
 	// Here you will define your flags and configuration settings.
 

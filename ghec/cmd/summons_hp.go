@@ -26,8 +26,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// hpCmd represents the hp command
-var hpCmd = &cobra.Command{
+// summonsHPCmd represents the hp command
+var summonsHPCmd = &cobra.Command{
 	Use:   "hp",
 	Short: "Increase summons HP",
 	Run: func(_ *cobra.Command, _ []string) {
@@ -36,7 +36,7 @@ var hpCmd = &cobra.Command{
 }
 
 func init() {
-	summonsCmd.AddCommand(hpCmd)
+	summonsCmd.AddCommand(summonsHPCmd)
 
 	// Here you will define your flags and configuration settings.
 
