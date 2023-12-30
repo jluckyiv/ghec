@@ -29,7 +29,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile          string
+	numTargets       int
+	level            int
+	previousUpgrades int
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -62,7 +67,9 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ghec.yaml)")
-
+	rootCmd.PersistentFlags().IntVarP(&numTargets, "targets", "t", 1, "number of current targets")
+	rootCmd.PersistentFlags().IntVarP(&level, "level", "l", 1, "ability card level")
+	rootCmd.PersistentFlags().IntVarP(&previousUpgrades, "previous", "p", 0, "number of previous enhancements")
 }
 
 // initConfig reads in config file and ENV variables if set.
