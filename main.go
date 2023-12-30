@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/jluckyiv/ghuc/cmd"
+import "github.com/jluckyiv/ghec/cmd"
 
 func main() {
 	cmd.Execute()
