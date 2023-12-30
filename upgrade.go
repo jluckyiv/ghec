@@ -1,16 +1,37 @@
 package ghuc
 
-type Enhancement struct {
-	BaseEnhancement      BaseEnhancement
-	MultipleTarget       int
-	Level                Level
-	PreviousEnhancements PreviousEnhancements
+func NewEnhancement(baseEnhancement BaseEnhancement) enhancement {
+	return enhancement{
+		baseEnhancement: baseEnhancement,
+	}
 }
 
-func (e Enhancement) Cost() Cost {
+type enhancement struct {
+	baseEnhancement      BaseEnhancement
+	multipleTarget       int
+	level                Level
+	previousEnhancements PreviousEnhancements
+}
+
+func (e enhancement) WithMultipleTarget(multipleTarget int) enhancement {
+	e.multipleTarget = multipleTarget
+	return e
+}
+
+func (e enhancement) WithLevel(level Level) enhancement {
+	e.level = level
+	return e
+}
+
+func (e enhancement) WithPreviousEnhancements(previousEnhancements PreviousEnhancements) enhancement {
+	e.previousEnhancements = previousEnhancements
+	return e
+}
+
+func (e enhancement) Cost() Cost {
 	cost := e.costForBaseEnhancement()
-	cost += costForLevel(e.Level)
-	cost += costForPreviousEnhancements(e.PreviousEnhancements)
+	cost += costForLevel(e.level)
+	cost += costForPreviousEnhancements(e.previousEnhancements)
 	return cost
 }
 
@@ -89,11 +110,11 @@ const (
 	CostEnhanceSummonsHP       Cost = 50
 )
 
-func (e Enhancement) costForBaseEnhancement() Cost {
+func (e enhancement) costForBaseEnhancement() Cost {
 	var cost Cost
-	switch e.BaseEnhancement {
+	switch e.baseEnhancement {
 	case EnhanceAddAttackHex:
-		return Cost(200 / e.MultipleTarget)
+		return Cost(200 / e.multipleTarget)
 	case EnhanceMove:
 		cost = CostEnhanceMove
 	case EnhanceAttack:
@@ -147,7 +168,7 @@ func (e Enhancement) costForBaseEnhancement() Cost {
 	default:
 		cost = 0
 	}
-	if e.MultipleTarget > 1 {
+	if e.multipleTarget > 1 {
 		cost *= 2
 	}
 	return cost
