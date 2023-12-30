@@ -84,6 +84,8 @@ type Cost int
 // BaseEnhancement is an enum of all the base enhancements.
 type BaseEnhancement int
 
+// Enhance* are constants for all the base enhancements.
+// They are exported for type safety.
 const (
 	EnhanceMove BaseEnhancement = iota
 	EnhanceAttack
@@ -113,6 +115,8 @@ const (
 	EnhanceAddAttackHex
 )
 
+// costForBaseEnhancement is a helper function that returns the base cost for
+// the base enhancement.
 func (e enhancement) costForBaseEnhancement() (Cost, error) {
 	var cost Cost
 	switch e.baseEnhancement {
@@ -181,6 +185,7 @@ func (e enhancement) costForBaseEnhancement() (Cost, error) {
 // Probably overkill to have an enum for this.
 type Level int
 
+// Level* are constants for all the levels, exported for type safety.
 const (
 	Level1 Level = 1
 	Level2 Level = 2
@@ -193,6 +198,8 @@ const (
 	Level9 Level = 9
 )
 
+// costForLevel is a helper function that returns the additional cost for the
+// ability card level.
 func costForLevel(level Level) (Cost, error) {
 	switch level {
 	case Level1:
@@ -218,8 +225,12 @@ func costForLevel(level Level) (Cost, error) {
 	}
 }
 
+// PreviousEnhancements is an enum of all the valid values for previous
+// enhancements.
 type PreviousEnhancements int
 
+// PreviousEnhancements* are constants for all the valid values for previous
+// enhancements, exported for type safety.
 const (
 	PreviousEnhancements0 PreviousEnhancements = iota
 	PreviousEnhancements1
@@ -227,6 +238,8 @@ const (
 	PreviousEnhancements3
 )
 
+// costForPreviousEnhancements is a helper function that returns the
+// additional cost for the number of previous enhancements.
 func costForPreviousEnhancements(previousEnhancements PreviousEnhancements) (Cost, error) {
 	switch previousEnhancements {
 	case PreviousEnhancements0:
