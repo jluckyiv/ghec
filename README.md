@@ -43,6 +43,9 @@ which presume a level 1 card with no previous enhancements and a single target.
 
 Summons enhancements are under the `summons` subcommand.
 
+The `--config` flag is currently unused, but the [Cobra](https://cobra.dev/) CLI
+package includes it by default, so I left it as a placeholder.
+
 ```sh
 ghec attack # increase attack on a level 1 card with no previous enhancements
 ghec bless # add bless to a level 1 card with no previous enhancements
