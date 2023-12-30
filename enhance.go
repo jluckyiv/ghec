@@ -1,5 +1,7 @@
 package ghec
 
+import "fmt"
+
 func NewEnhancement(baseEnhancement BaseEnhancement) enhancement {
 	return enhancement{
 		baseEnhancement: baseEnhancement,
@@ -28,11 +30,17 @@ func (e enhancement) WithPreviousEnhancements(previousEnhancements PreviousEnhan
 	return e
 }
 
-func (e enhancement) Cost() Cost {
+func (e enhancement) Cost() (Cost, error) {
+	if e.level < 1 || e.level > 9 {
+		return 0, fmt.Errorf("level must be between 1 and 9, but is: %d", e.level)
+	}
+	if e.previousEnhancements < 0 || e.previousEnhancements > 3 {
+		return 0, fmt.Errorf("previous enhancements must be between 0 and 3, but is: %d", e.previousEnhancements)
+	}
 	cost := e.costForBaseEnhancement()
 	cost += costForLevel(e.level)
 	cost += costForPreviousEnhancements(e.previousEnhancements)
-	return cost
+	return cost, nil
 }
 
 type BaseEnhancement int

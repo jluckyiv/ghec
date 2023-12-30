@@ -15,7 +15,7 @@ func TestEnhanceFromExample(t *testing.T) {
 		WithMultipleTarget(3).
 		WithLevel(ghec.Level3)
 
-	actual := input.Cost()
+	actual, _ := input.Cost()
 	if actual != ghec.Cost(150) {
 		t.Fatalf("Expected 150, got %d", actual)
 	}
@@ -25,7 +25,7 @@ func TestEnhanceFromExample(t *testing.T) {
 		WithMultipleTarget(3).
 		WithLevel(ghec.Level3).
 		WithPreviousEnhancements(ghec.PreviousEnhancements1)
-	actual = input.Cost()
+	actual, _ = input.Cost()
 	if actual != ghec.Cost(191) {
 		t.Fatalf("Expected 191, got %d", actual)
 	}
