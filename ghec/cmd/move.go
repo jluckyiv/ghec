@@ -32,7 +32,7 @@ import (
 var moveCmd = &cobra.Command{
 	Use:   "move",
 	Short: "Increase move",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceMove).
 			WithMultipleTarget(numTargets).

@@ -32,7 +32,7 @@ import (
 var healCmd = &cobra.Command{
 	Use:   "heal",
 	Short: "Add heal",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceHeal).
 			WithMultipleTarget(numTargets).

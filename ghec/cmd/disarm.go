@@ -32,7 +32,7 @@ import (
 var disarmCmd = &cobra.Command{
 	Use:   "disarm",
 	Short: "Add disarm",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceDisarm).
 			WithMultipleTarget(numTargets).

@@ -32,7 +32,7 @@ import (
 var elemCmd = &cobra.Command{
 	Use:   "elem",
 	Short: "Add specific element",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		any, _ := cmd.Flags().GetBool("any")
 		enh := ghec.EnhanceSpecificElement
 		desc := "specific"

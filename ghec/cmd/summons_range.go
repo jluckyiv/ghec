@@ -32,7 +32,7 @@ import (
 var rangeCmd = &cobra.Command{
 	Use:   "range",
 	Short: "Increase summons range",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceSummonsRange).
 			WithMultipleTarget(numTargets).

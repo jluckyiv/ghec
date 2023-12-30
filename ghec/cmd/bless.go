@@ -32,7 +32,7 @@ import (
 var blessCmd = &cobra.Command{
 	Use:   "bless",
 	Short: "Add bless",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceBless).
 			WithMultipleTarget(numTargets).

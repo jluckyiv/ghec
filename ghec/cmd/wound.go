@@ -32,7 +32,7 @@ import (
 var woundCmd = &cobra.Command{
 	Use:   "wound",
 	Short: "Add wound",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceWound).
 			WithMultipleTarget(numTargets).

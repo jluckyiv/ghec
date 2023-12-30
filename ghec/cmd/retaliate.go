@@ -32,7 +32,7 @@ import (
 var retaliateCmd = &cobra.Command{
 	Use:   "retaliate",
 	Short: "Add retaliate",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceRetaliate).
 			WithMultipleTarget(numTargets).

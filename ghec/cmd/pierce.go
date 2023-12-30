@@ -32,7 +32,7 @@ import (
 var pierceCmd = &cobra.Command{
 	Use:   "pierce",
 	Short: "Add pierce",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhancePierce).
 			WithMultipleTarget(numTargets).

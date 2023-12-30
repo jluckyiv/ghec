@@ -32,7 +32,7 @@ import (
 var muddleCmd = &cobra.Command{
 	Use:   "muddle",
 	Short: "Add muddle",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceMuddle).
 			WithMultipleTarget(numTargets).

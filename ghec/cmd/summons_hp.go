@@ -32,7 +32,7 @@ import (
 var hpCmd = &cobra.Command{
 	Use:   "hp",
 	Short: "Increase summons HP",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceSummonsHP).
 			WithMultipleTarget(numTargets).

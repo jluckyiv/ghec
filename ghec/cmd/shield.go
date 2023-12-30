@@ -32,7 +32,7 @@ import (
 var shieldCmd = &cobra.Command{
 	Use:   "shield",
 	Short: "Add shield",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceShield).
 			WithMultipleTarget(numTargets).

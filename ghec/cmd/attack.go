@@ -32,7 +32,7 @@ import (
 var attackCmd = &cobra.Command{
 	Use:   "attack",
 	Short: "Increase attack",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceAttack).
 			WithMultipleTarget(numTargets).

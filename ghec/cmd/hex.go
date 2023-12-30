@@ -32,7 +32,7 @@ import (
 var hexCmd = &cobra.Command{
 	Use:   "hex",
 	Short: "Add hex to an AoE attack",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceAddAttackHex).
 			WithMultipleTarget(numTargets).
