@@ -1,4 +1,4 @@
-package ghuc
+package ghec
 
 func NewEnhancement(baseEnhancement BaseEnhancement) enhancement {
 	return enhancement{

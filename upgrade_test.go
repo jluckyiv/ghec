@@ -1,29 +1,29 @@
-package ghuc_test
+package ghec_test
 
 import (
 	"testing"
 
-	"github.com/jluckyiv/ghuc"
+	"github.com/jluckyiv/ghec"
 )
 
 func TestEnhanceFromExample(t *testing.T) {
-	input := ghuc.NewEnhancement(
-		ghuc.EnhanceAttack).
+	input := ghec.NewEnhancement(
+		ghec.EnhanceAttack).
 		WithMultipleTarget(3).
-		WithLevel(ghuc.Level3)
+		WithLevel(ghec.Level3)
 
 	actual := input.Cost()
-	if actual != ghuc.Cost(150) {
+	if actual != ghec.Cost(150) {
 		t.Fatalf("Expected 150, got %d", actual)
 	}
 
-	input = ghuc.NewEnhancement(
-		ghuc.EnhanceAddAttackHex).
+	input = ghec.NewEnhancement(
+		ghec.EnhanceAddAttackHex).
 		WithMultipleTarget(3).
-		WithLevel(ghuc.Level3).
-		WithPreviousEnhancements(ghuc.PreviousEnhancements1)
+		WithLevel(ghec.Level3).
+		WithPreviousEnhancements(ghec.PreviousEnhancements1)
 	actual = input.Cost()
-	if actual != ghuc.Cost(191) {
+	if actual != ghec.Cost(191) {
 		t.Fatalf("Expected 191, got %d", actual)
 	}
 
