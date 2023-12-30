@@ -31,7 +31,7 @@ import (
 // summonsAttackCmd represents the attack command
 var summonsAttackCmd = &cobra.Command{
 	Use:   "attack",
-	Short: "A brief description of your command",
+	Short: "increase summons attack",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 

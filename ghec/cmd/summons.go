@@ -28,7 +28,7 @@ import (
 // summonsCmd represents the summons command
 var summonsCmd = &cobra.Command{
 	Use:   "summons",
-	Short: "A brief description of your command",
+	Short: "summmons enhancements",
 }
 
 func init() {

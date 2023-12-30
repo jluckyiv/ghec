@@ -31,7 +31,7 @@ import (
 // hpCmd represents the hp command
 var hpCmd = &cobra.Command{
 	Use:   "hp",
-	Short: "A brief description of your command",
+	Short: "increase summons hp",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 

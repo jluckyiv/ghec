@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/jluckyiv/ghec"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,17 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("elem called")
+		any, _ := cmd.Flags().GetBool("any")
+		enhancement := ghec.EnhanceSpecificElement
+		if any {
+			enhancement = ghec.EnhanceAnyElement
+		}
+		e := ghec.
+			NewEnhancement(enhancement).
+			WithMultipleTarget(numTargets).
+			WithLevel(ghec.Level(level)).
+			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
+		fmt.Printf("add element costs %d", e.Cost())
 	},
 }
 
@@ -53,5 +64,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// elemCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	elemCmd.Flags().BoolP("any", "a", false, "Any element enhancement")
 }

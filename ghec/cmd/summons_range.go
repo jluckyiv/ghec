@@ -28,10 +28,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// summonsRangeCmd represents the range command
-var summonsRangeCmd = &cobra.Command{
+// rangeCmd represents the range command
+var rangeCmd = &cobra.Command{
 	Use:   "range",
-	Short: "A brief description of your command",
+	Short: "increase summons range",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -49,15 +49,15 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	summonsCmd.AddCommand(summonsRangeCmd)
+	summonsCmd.AddCommand(rangeCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// summonsRangeCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// rangeCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// summonsRangeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rangeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

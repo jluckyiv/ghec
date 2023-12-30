@@ -31,7 +31,7 @@ import (
 // summonsMoveCmd represents the move command
 var summonsMoveCmd = &cobra.Command{
 	Use:   "move",
-	Short: "A brief description of your command",
+	Short: "increase summons move",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -49,7 +49,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(summonsMoveCmd)
+	summonsCmd.AddCommand(summonsMoveCmd)
 
 	// Here you will define your flags and configuration settings.
 
