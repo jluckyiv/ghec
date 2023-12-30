@@ -61,11 +61,25 @@ func (e enhancement) Cost() (Cost, error) {
 	if e.previousEnhancements < 0 || e.previousEnhancements > 3 {
 		return 0, fmt.Errorf("previous enhancements must be between 0 and 3, not %d", e.previousEnhancements)
 	}
-	cost := e.costForBaseEnhancement()
-	cost += costForLevel(e.level)
-	cost += costForPreviousEnhancements(e.previousEnhancements)
-	return cost, nil
+	baseCost, err := e.costForBaseEnhancement()
+	if err != nil {
+		return 0, err
+	}
+	levelCost, err := costForLevel(e.level)
+	if err != nil {
+		return 0, err
+	}
+	previousEnhancementCost, err := costForPreviousEnhancements(e.previousEnhancements)
+	if err != nil {
+		return 0, err
+	}
+	totalCost := baseCost + levelCost + previousEnhancementCost
+	return totalCost, nil
 }
+
+// Cost is the cost of an enhancement.
+// Probably overkill to have a type for this.
+type Cost int
 
 // BaseEnhancement is an enum of all the base enhancements.
 type BaseEnhancement int
@@ -99,101 +113,68 @@ const (
 	EnhanceAddAttackHex
 )
 
-// Cost is the cost of an enhancement.
-// Probably overkill to have a type for this.
-type Cost int
-
-// BaseCostEnhance* are the base costs for each base enhancement.
-const (
-	BaseCostEnhanceMove            Cost = 30
-	BaseCostEnhanceAttack          Cost = 50
-	BaseCostEnhanceRange           Cost = 30
-	BaseCostEnhanceShield          Cost = 100
-	BaseCostEnhancePush            Cost = 30
-	BaseCostEnhancePull            Cost = 30
-	BaseCostEnhancePierce          Cost = 30
-	BaseCostEnhanceRetaliate       Cost = 100
-	BaseCostEnhanceHeal            Cost = 30
-	BaseCostEnhanceTarget          Cost = 50
-	BaseCostEnhancePoison          Cost = 75
-	BaseCostEnhanceWound           Cost = 75
-	BaseCostEnhanceMuddle          Cost = 50
-	BaseCostEnhanceImmobilize      Cost = 100
-	BaseCostEnhanceDisarm          Cost = 150
-	BaseCostEnhanceCurse           Cost = 75
-	BaseCostEnhanceStrengthen      Cost = 50
-	BaseCostEnhanceBless           Cost = 50
-	BaseCostEnhanceJump            Cost = 50
-	BaseCostEnhanceSpecificElement Cost = 100
-	BaseCostEnhanceAnyElement      Cost = 150
-	BaseCostEnhanceSummonsMove     Cost = 100
-	BaseCostEnhanceSummonsAttack   Cost = 100
-	BaseCostEnhanceSummonsRange    Cost = 50
-	BaseCostEnhanceSummonsHP       Cost = 50
-)
-
-func (e enhancement) costForBaseEnhancement() Cost {
+func (e enhancement) costForBaseEnhancement() (Cost, error) {
 	var cost Cost
 	switch e.baseEnhancement {
 	case EnhanceAddAttackHex:
-		return Cost(200 / e.multipleTarget)
+		return Cost(200 / e.multipleTarget), nil
 	case EnhanceMove:
-		cost = BaseCostEnhanceMove
+		cost = 30
 	case EnhanceAttack:
-		cost = BaseCostEnhanceAttack
+		cost = 50
 	case EnhanceRange:
-		cost = BaseCostEnhanceRange
+		cost = 30
 	case EnhanceShield:
-		cost = BaseCostEnhanceShield
+		cost = 100
 	case EnhancePush:
-		cost = BaseCostEnhancePush
+		cost = 30
 	case EnhancePull:
-		cost = BaseCostEnhancePull
+		cost = 30
 	case EnhancePierce:
-		cost = BaseCostEnhancePierce
+		cost = 30
 	case EnhanceRetaliate:
-		cost = BaseCostEnhanceRetaliate
+		cost = 100
 	case EnhanceHeal:
-		cost = BaseCostEnhanceHeal
+		cost = 30
 	case EnhanceTarget:
-		cost = BaseCostEnhanceTarget
+		cost = 50
 	case EnhancePoison:
-		cost = BaseCostEnhancePoison
+		cost = 75
 	case EnhanceWound:
-		cost = BaseCostEnhanceWound
+		cost = 75
 	case EnhanceMuddle:
-		cost = BaseCostEnhanceMuddle
+		cost = 50
 	case EnhanceImmobilize:
-		cost = BaseCostEnhanceImmobilize
+		cost = 100
 	case EnhanceDisarm:
-		cost = BaseCostEnhanceDisarm
+		cost = 150
 	case EnhanceCurse:
-		cost = BaseCostEnhanceCurse
+		cost = 75
 	case EnhanceStrengthen:
-		cost = BaseCostEnhanceStrengthen
+		cost = 50
 	case EnhanceBless:
-		cost = BaseCostEnhanceBless
+		cost = 50
 	case EnhanceJump:
-		cost = BaseCostEnhanceJump
+		cost = 50
 	case EnhanceSpecificElement:
-		cost = BaseCostEnhanceSpecificElement
+		cost = 100
 	case EnhanceAnyElement:
-		cost = BaseCostEnhanceAnyElement
+		cost = 150
 	case EnhanceSummonsMove:
-		cost = BaseCostEnhanceSummonsMove
+		cost = 100
 	case EnhanceSummonsAttack:
-		cost = BaseCostEnhanceSummonsAttack
+		cost = 100
 	case EnhanceSummonsRange:
-		cost = BaseCostEnhanceSummonsRange
+		cost = 50
 	case EnhanceSummonsHP:
-		cost = BaseCostEnhanceSummonsHP
+		cost = 50
 	default:
-		cost = 0
+		return 0, fmt.Errorf("unknown base enhancement %d", e.baseEnhancement)
 	}
 	if e.multipleTarget > 1 {
 		cost *= 2
 	}
-	return cost
+	return cost, nil
 }
 
 // Level is an enum of all the levels.
@@ -212,41 +193,28 @@ const (
 	Level9 Level = 9
 )
 
-// CostEnhanceLevel* are the cost premiums for each level.
-const (
-	CostEnhanceLevel1 Cost = 0
-	CostEnhanceLevel2 Cost = 25
-	CostEnhanceLevel3 Cost = 50
-	CostEnhanceLevel4 Cost = 75
-	CostEnhanceLevel5 Cost = 100
-	CostEnhanceLevel6 Cost = 125
-	CostEnhanceLevel7 Cost = 150
-	CostEnhanceLevel8 Cost = 175
-	CostEnhanceLevel9 Cost = 200
-)
-
-func costForLevel(level Level) Cost {
+func costForLevel(level Level) (Cost, error) {
 	switch level {
 	case Level1:
-		return CostEnhanceLevel1
+		return 0, nil
 	case Level2:
-		return CostEnhanceLevel2
+		return 25, nil
 	case Level3:
-		return CostEnhanceLevel3
+		return 50, nil
 	case Level4:
-		return CostEnhanceLevel4
+		return 75, nil
 	case Level5:
-		return CostEnhanceLevel5
+		return 100, nil
 	case Level6:
-		return CostEnhanceLevel6
+		return 125, nil
 	case Level7:
-		return CostEnhanceLevel7
+		return 150, nil
 	case Level8:
-		return CostEnhanceLevel8
+		return 175, nil
 	case Level9:
-		return CostEnhanceLevel9
+		return 200, nil
 	default:
-		return 0
+		return 0, fmt.Errorf("level must be between 1 and 9, not %d", level)
 	}
 }
 
@@ -259,24 +227,17 @@ const (
 	PreviousEnhancements3
 )
 
-const (
-	CostPreviousEnhancements0 Cost = 0
-	CostPreviousEnhancements1 Cost = 75
-	CostPreviousEnhancements2 Cost = 150
-	CostPreviousEnhancements3 Cost = 225
-)
-
-func costForPreviousEnhancements(previousEnhancements PreviousEnhancements) Cost {
+func costForPreviousEnhancements(previousEnhancements PreviousEnhancements) (Cost, error) {
 	switch previousEnhancements {
 	case PreviousEnhancements0:
-		return CostPreviousEnhancements0
+		return 0, nil
 	case PreviousEnhancements1:
-		return CostPreviousEnhancements1
+		return 75, nil
 	case PreviousEnhancements2:
-		return CostPreviousEnhancements2
+		return 150, nil
 	case PreviousEnhancements3:
-		return CostPreviousEnhancements3
+		return 225, nil
 	default:
-		return CostPreviousEnhancements0
+		return 0, fmt.Errorf("previous enhancements must be between 0 and 3, not %d", previousEnhancements)
 	}
 }
