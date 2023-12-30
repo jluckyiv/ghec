@@ -1,3 +1,3 @@
-# ghuc
+# ghec
 
-Gloomhaven upgrade calculator (cli)
+Gloomhaven enhancement calculator (cli)
