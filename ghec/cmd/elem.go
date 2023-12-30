@@ -31,25 +31,21 @@ import (
 // elemCmd represents the elem command
 var elemCmd = &cobra.Command{
 	Use:   "elem",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add specific element",
 	Run: func(cmd *cobra.Command, args []string) {
 		any, _ := cmd.Flags().GetBool("any")
-		enhancement := ghec.EnhanceSpecificElement
+		enh := ghec.EnhanceSpecificElement
+		desc := "specific"
 		if any {
-			enhancement = ghec.EnhanceAnyElement
+			enh = ghec.EnhanceAnyElement
+			desc = "any"
 		}
 		e := ghec.
-			NewEnhancement(enhancement).
+			NewEnhancement(enh).
 			WithMultipleTarget(numTargets).
 			WithLevel(ghec.Level(level)).
 			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("add element costs %d", e.Cost())
+		fmt.Printf("Add %s element costs %d", desc, e.Cost())
 	},
 }
 

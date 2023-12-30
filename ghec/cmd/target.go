@@ -31,20 +31,14 @@ import (
 // targetCmd represents the target command
 var targetCmd = &cobra.Command{
 	Use:   "target",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add additional target",
 	Run: func(cmd *cobra.Command, args []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceTarget).
 			WithMultipleTarget(numTargets).
 			WithLevel(ghec.Level(level)).
 			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("add target costs %d", e.Cost())
+		fmt.Printf("Add target costs %d", e.Cost())
 	},
 }
 

@@ -31,20 +31,14 @@ import (
 // pierceCmd represents the pierce command
 var pierceCmd = &cobra.Command{
 	Use:   "pierce",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add pierce",
 	Run: func(cmd *cobra.Command, args []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhancePierce).
 			WithMultipleTarget(numTargets).
 			WithLevel(ghec.Level(level)).
 			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("add pierce costs %d", e.Cost())
+		fmt.Printf("Add pierce costs %d", e.Cost())
 	},
 }
 

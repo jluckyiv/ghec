@@ -31,20 +31,14 @@ import (
 // shieldCmd represents the shield command
 var shieldCmd = &cobra.Command{
 	Use:   "shield",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add shield",
 	Run: func(cmd *cobra.Command, args []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceShield).
 			WithMultipleTarget(numTargets).
 			WithLevel(ghec.Level(level)).
 			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("add shield costs %d", e.Cost())
+		fmt.Printf("Add shield costs %d", e.Cost())
 	},
 }
 

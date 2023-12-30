@@ -31,20 +31,14 @@ import (
 // summonsAttackCmd represents the attack command
 var summonsAttackCmd = &cobra.Command{
 	Use:   "attack",
-	Short: "increase summons attack",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Increase summons attack",
 	Run: func(cmd *cobra.Command, args []string) {
 		e := ghec.
 			NewEnhancement(ghec.EnhanceSummonsAttack).
 			WithMultipleTarget(numTargets).
 			WithLevel(ghec.Level(level)).
 			WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
-		fmt.Printf("summons attack costs %d", e.Cost())
+		fmt.Printf("Increase summons attack costs %d", e.Cost())
 	},
 }
 
