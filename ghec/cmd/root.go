@@ -30,10 +30,10 @@ import (
 )
 
 var (
-	cfgFile          string
-	numTargets       int
-	level            int
-	previousUpgrades int
+	cfgFile              string
+	numTargets           int
+	level                int
+	previousEnhancements int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -48,8 +48,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {
-	},
+	// Run: func(cmd *cobra.Command, args []string) {
+	// },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -69,7 +69,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ghec.yaml)")
 	rootCmd.PersistentFlags().IntVarP(&numTargets, "targets", "t", 1, "number of current targets")
 	rootCmd.PersistentFlags().IntVarP(&level, "level", "l", 1, "ability card level")
-	rootCmd.PersistentFlags().IntVarP(&previousUpgrades, "previous", "p", 0, "number of previous enhancements")
+	rootCmd.PersistentFlags().IntVarP(&previousEnhancements, "previous", "p", 0, "number of previous enhancements")
 }
 
 // initConfig reads in config file and ENV variables if set.
