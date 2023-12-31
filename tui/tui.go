@@ -24,6 +24,8 @@ type model struct {
 	err     error
 	spinner spinner.Model
 	state   state
+	height  int
+	width   int
 }
 
 var quitKeys = key.NewBinding(
@@ -49,6 +51,11 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+
+	case tea.WindowSizeMsg:
+		m.height = msg.Height
+		m.width = msg.Width
+		return m, nil
 
 	case tea.KeyMsg:
 		if key.Matches(msg, quitKeys) {
@@ -83,7 +90,14 @@ func (m model) View() string {
 	if m.err != nil {
 		return m.err.Error()
 	}
-	str := fmt.Sprintf("\n\n   %s Loading forever... %s\n\n", m.spinner.View(), quitKeys.Help().Desc)
+	spinnerView := m.spinner.View()
+	str := fmt.Sprintf(
+		"\n\n   %s Loading forever... %s\n\n    %d, %d",
+		spinnerView,
+		quitKeys.Help().Desc,
+		m.height,
+		m.width,
+	)
 	if m.state == quitting {
 		return str + "\n"
 	}
