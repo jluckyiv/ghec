@@ -17,6 +17,7 @@ type state int
 const (
 	loading state = iota
 	quitting
+	stopped
 )
 
 type model struct {
@@ -28,6 +29,11 @@ type model struct {
 var quitKeys = key.NewBinding(
 	key.WithKeys("q", "esc", "ctrl+c"),
 	key.WithHelp("", "press q to quit"),
+)
+
+var stopKeys = key.NewBinding(
+	key.WithKeys(" ", "enter"),
+	key.WithHelp("", "press space or enter to stop"),
 )
 
 func initialModel() model {
@@ -48,7 +54,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, quitKeys) {
 			m.state = quitting
 			return m, tea.Quit
-
+		}
+		if key.Matches(msg, stopKeys) {
+			if m.state == stopped {
+				m.state = loading
+				return m, m.spinner.Tick
+			}
+			if m.state == loading {
+				m.state = stopped
+			}
+			return m, nil
 		}
 		return m, nil
 	case errMsg:
@@ -57,7 +72,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	default:
 		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
+		if m.state == loading {
+			m.spinner, cmd = m.spinner.Update(msg)
+		}
 		return m, cmd
 	}
 }
