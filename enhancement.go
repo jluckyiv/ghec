@@ -115,6 +115,96 @@ const (
 	EnhanceAddAttackHex
 )
 
+func ToString(be BaseEnhancement) string {
+	switch be {
+	case EnhanceMove:
+		return "Move"
+	case EnhanceAttack:
+		return "Attack"
+	case EnhanceRange:
+		return "Range"
+	case EnhanceShield:
+		return "Shield"
+	case EnhancePush:
+		return "Push"
+	case EnhancePull:
+		return "Pull"
+	case EnhancePierce:
+		return "Pierce"
+	case EnhanceRetaliate:
+		return "Retaliate"
+	case EnhanceHeal:
+		return "Heal"
+	case EnhanceTarget:
+		return "Target"
+	case EnhancePoison:
+		return "Poison"
+	case EnhanceWound:
+		return "Wound"
+	case EnhanceMuddle:
+		return "Muddle"
+	case EnhanceImmobilize:
+		return "Immobilize"
+	case EnhanceDisarm:
+		return "Disarm"
+	case EnhanceCurse:
+		return "Curse"
+	case EnhanceStrengthen:
+		return "Strengthen"
+	case EnhanceBless:
+		return "Bless"
+	case EnhanceJump:
+		return "Jump"
+	case EnhanceSpecificElement:
+		return "Specific Element"
+	case EnhanceAnyElement:
+		return "Any Element"
+	case EnhanceSummonsMove:
+		return "Summons Move"
+	case EnhanceSummonsAttack:
+		return "Summons Attack"
+	case EnhanceSummonsRange:
+		return "Summons Range"
+	case EnhanceSummonsHP:
+		return "Summons HP"
+	case EnhanceAddAttackHex:
+		return "Add Attack Hex"
+	default:
+		return "Unknown"
+	}
+}
+
+func Map[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
+	return map[BaseEnhancement]T{
+		EnhanceMove:            f(EnhanceMove),
+		EnhanceAttack:          f(EnhanceAttack),
+		EnhanceRange:           f(EnhanceRange),
+		EnhanceShield:          f(EnhanceShield),
+		EnhancePush:            f(EnhancePush),
+		EnhancePull:            f(EnhancePull),
+		EnhancePierce:          f(EnhancePierce),
+		EnhanceRetaliate:       f(EnhanceRetaliate),
+		EnhanceHeal:            f(EnhanceHeal),
+		EnhanceTarget:          f(EnhanceTarget),
+		EnhancePoison:          f(EnhancePoison),
+		EnhanceWound:           f(EnhanceWound),
+		EnhanceMuddle:          f(EnhanceMuddle),
+		EnhanceImmobilize:      f(EnhanceImmobilize),
+		EnhanceDisarm:          f(EnhanceDisarm),
+		EnhanceCurse:           f(EnhanceCurse),
+		EnhanceStrengthen:      f(EnhanceStrengthen),
+		EnhanceBless:           f(EnhanceBless),
+		EnhanceJump:            f(EnhanceJump),
+		EnhanceSpecificElement: f(EnhanceSpecificElement),
+		EnhanceAnyElement:      f(EnhanceAnyElement),
+		EnhanceSummonsMove:     f(EnhanceSummonsMove),
+		EnhanceSummonsAttack:   f(EnhanceSummonsAttack),
+		EnhanceSummonsRange:    f(EnhanceSummonsRange),
+		EnhanceSummonsHP:       f(EnhanceSummonsHP),
+		EnhanceAddAttackHex:    f(EnhanceAddAttackHex),
+	}
+}
+
 // costForBaseEnhancement is a helper function that returns the base cost for
 // the base enhancement.
 func (e enhancement) costForBaseEnhancement() (Cost, error) {
