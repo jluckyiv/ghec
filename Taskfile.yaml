@@ -1,0 +1,46 @@
+version: "3"
+
+tasks:
+  build:
+    desc: "build the compiled binary"
+    cmds:
+      - go build
+
+  clean:
+    desc: "clean up"
+    cmds:
+      - go clean
+
+  test:
+    desc: "run all unit tests"
+    cmds:
+      - grc go test ./...
+
+  watch:
+    desc: "run all unit tests in watch mode"
+    cmds:
+      - grc gow test ./...
+
+  cover:
+    desc: "check test coverage"
+    cmds:
+      - grc go test ./... --cover
+      # - go tool ./... cover -html=cp.out
+
+  fmt:
+    desc: "format code"
+    cmds:
+      - gofumpt -l -w .
+
+  lint:
+    desc: "lint the code"
+    cmds:
+      - exhaustive ./...
+      - golangci-lint run
+
+  run:
+    desc: "runs the compiled binary"
+    cmds:
+      # - op run --no-masking --env-file=.env -- go run ghec/main.go {{.CLI_ARGS}}
+      - task: lint
+      - go run ghec/main.go {{.CLI_ARGS}}
