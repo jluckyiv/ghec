@@ -18,7 +18,15 @@ const (
 	loading state = iota
 	quitting
 	stopped
+	focusRight
 )
+
+var activeStyle = lipgloss.NewStyle().
+	Border(lipgloss.NormalBorder(), true).
+	BorderForeground(lipgloss.Color("205"))
+
+var inactiveStyle = activeStyle.Copy().
+	Border(lipgloss.HiddenBorder(), true)
 
 type model struct {
 	err     error
@@ -34,8 +42,13 @@ var quitKeys = key.NewBinding(
 )
 
 var stopKeys = key.NewBinding(
-	key.WithKeys(" ", "enter"),
+	key.WithKeys(" "),
 	key.WithHelp("", "press space or enter to stop"),
+)
+
+var focusKeys = key.NewBinding(
+	key.WithKeys("tab"),
+	key.WithHelp("", "press tab to focus"),
 )
 
 func initialModel() model {
@@ -72,6 +85,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+		if key.Matches(msg, focusKeys) {
+			if m.state == focusRight {
+				m.state = loading
+				return m, m.spinner.Tick
+			}
+			m.state = focusRight
+		}
 		return m, nil
 	case errMsg:
 		m.err = msg
@@ -87,21 +107,35 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	x, y := activeStyle.GetFrameSize()
+	height := m.height - y
+	width := (m.width - x) / 2
 	if m.err != nil {
 		return m.err.Error()
 	}
 	spinnerView := m.spinner.View()
-	str := fmt.Sprintf(
-		"\n\n   %s Loading forever... %s\n\n    %d, %d",
+	leftContent := fmt.Sprintf(
+		"\n\n   %s Loading forever... %s\n\n",
 		spinnerView,
 		quitKeys.Help().Desc,
+	)
+	rightContent := fmt.Sprintf(
+		"\n\n    %d, %d",
 		m.height,
 		m.width,
 	)
 	if m.state == quitting {
-		return str + "\n"
+		return leftContent + "\n"
 	}
-	return str
+	var left, right string
+	if m.state == focusRight {
+		left = inactiveStyle.Width(width).Height(height).Render(leftContent)
+		right = activeStyle.Width(width).Height(height).Render(rightContent)
+	} else {
+		left = activeStyle.Width(width).Height(height).Render(leftContent)
+		right = inactiveStyle.Width(width).Height(height).Render(rightContent)
+	}
+	return lipgloss.JoinHorizontal(lipgloss.Top, left, right)
 }
 
 func Run() {
