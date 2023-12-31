@@ -12,10 +12,17 @@ import (
 
 type errMsg error
 
+type state int
+
+const (
+	loading state = iota
+	quitting
+)
+
 type model struct {
-	err      error
-	spinner  spinner.Model
-	quitting bool
+	err     error
+	spinner spinner.Model
+	state   state
 }
 
 var quitKeys = key.NewBinding(
@@ -27,7 +34,7 @@ func initialModel() model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	return model{spinner: s}
+	return model{spinner: s, state: loading}
 }
 
 func (m model) Init() tea.Cmd {
@@ -39,7 +46,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		if key.Matches(msg, quitKeys) {
-			m.quitting = true
+			m.state = quitting
 			return m, tea.Quit
 
 		}
@@ -60,7 +67,7 @@ func (m model) View() string {
 		return m.err.Error()
 	}
 	str := fmt.Sprintf("\n\n   %s Loading forever... %s\n\n", m.spinner.View(), quitKeys.Help().Desc)
-	if m.quitting {
+	if m.state == quitting {
 		return str + "\n"
 	}
 	return str
