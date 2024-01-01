@@ -3,11 +3,13 @@ package tui
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/jluckyiv/ghec"
 )
 
 type errMsg error
@@ -17,9 +19,10 @@ type state int
 const (
 	loading state = iota
 	quitting
-	stopped
 	focusRight
 )
+
+var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 var activeStyle = lipgloss.NewStyle().
 	Border(lipgloss.NormalBorder(), true).
@@ -28,41 +31,78 @@ var activeStyle = lipgloss.NewStyle().
 var inactiveStyle = activeStyle.Copy().
 	Border(lipgloss.HiddenBorder(), true)
 
-type model struct {
-	err     error
-	spinner spinner.Model
-	state   state
-	height  int
-	width   int
-}
-
-var quitKeys = key.NewBinding(
-	key.WithKeys("q", "esc", "ctrl+c"),
-	key.WithHelp("", "press q to quit"),
-)
-
-var stopKeys = key.NewBinding(
-	key.WithKeys(" "),
-	key.WithHelp("", "press space or enter to stop"),
-)
-
 var focusKeys = key.NewBinding(
 	key.WithKeys("tab"),
-	key.WithHelp("", "press tab to focus"),
+	key.WithHelp("focus", "press tab to focus"),
 )
 
+var levelKeys = key.NewBinding(
+	key.WithKeys("1", "2", "3", "4", "5", "6", "7", "8", "9"),
+	key.WithHelp("1–9", "card level"),
+)
+
+var previousEnhancementKeys = key.NewBinding(
+	key.WithKeys("p", "P"),
+	key.WithHelp("p/P", "num prev enh"),
+)
+
+var targetKeys = key.NewBinding(
+	key.WithKeys("+", "=", "-"),
+	key.WithHelp("+/-", "num targets"),
+)
+
+type model struct {
+	list             list.Model
+	err              error
+	baseEnhancements []ghec.BaseEnhancement
+	state            state
+	height           int
+	width            int
+	level            ghec.Level
+	prev             ghec.PreviousEnhancements
+	targets          int
+}
+
 func initialModel() model {
-	s := spinner.New()
-	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	return model{spinner: s, state: loading}
+	identity := func(be ghec.BaseEnhancement) ghec.BaseEnhancement { return be }
+	baseEnhancements := ghec.List(identity)
+	items := ghec.List(newItem)
+	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	l.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			levelKeys,
+			previousEnhancementKeys,
+			targetKeys,
+		}
+	}
+	l.AdditionalFullHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			levelKeys,
+			previousEnhancementKeys,
+			targetKeys,
+		}
+	}
+	m := model{
+		list: l, state: loading, level: 1, prev: 0, targets: 1,
+		baseEnhancements: baseEnhancements,
+	}
+	return m
+}
+
+func (m model) Title() string {
+	be := m.baseEnhancements[m.list.Index()]
+	cost, _ := ghec.NewEnhancement(be).WithLevel(m.level).WithPreviousEnhancements(m.prev).Cost()
+	return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %d", m.level, m.targets, m.prev, cost)
 }
 
 func (m model) Init() tea.Cmd {
-	return m.spinner.Tick
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	cmds := []tea.Cmd{}
+
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
@@ -70,70 +110,90 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		return m, nil
 
-	case tea.KeyMsg:
-		if key.Matches(msg, quitKeys) {
-			m.state = quitting
-			return m, tea.Quit
-		}
-		if key.Matches(msg, stopKeys) {
-			if m.state == stopped {
-				m.state = loading
-				return m, m.spinner.Tick
-			}
-			if m.state == loading {
-				m.state = stopped
-			}
-			return m, nil
-		}
-		if key.Matches(msg, focusKeys) {
-			if m.state == focusRight {
-				m.state = loading
-				return m, m.spinner.Tick
-			}
-			m.state = focusRight
-		}
-		return m, nil
 	case errMsg:
 		m.err = msg
 		return m, nil
 
-	default:
-		var cmd tea.Cmd
-		if m.state == loading {
-			m.spinner, cmd = m.spinner.Update(msg)
+	case tea.KeyMsg:
+		if key.Matches(msg, levelKeys) {
+			if l, err := strconv.Atoi(msg.String()); err == nil {
+				m.level = ghec.Level(l)
+			}
 		}
-		return m, cmd
+		if key.Matches(msg, previousEnhancementKeys) {
+			if msg.String() == "P" {
+				m.prev = ghec.DecrementPrevious(m.prev)
+			}
+			if msg.String() == "p" {
+				m.prev = ghec.IncrementPrevious(m.prev)
+			}
+		}
+		if key.Matches(msg, targetKeys) {
+			if msg.String() == "+" || msg.String() == "=" {
+				m.targets = m.targets + 1
+			}
+			if msg.String() == "-" && m.targets > 1 {
+				m.targets = m.targets - 1
+			}
+		}
+		if key.Matches(msg, focusKeys) {
+			if m.state == focusRight {
+				m.state = loading
+			} else {
+				m.state = focusRight
+			}
+		}
 	}
+
+	m.list, cmd = m.list.Update(msg)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
-	x, y := activeStyle.GetFrameSize()
-	height := m.height - y
-	width := (m.width - x) / 2
 	if m.err != nil {
 		return m.err.Error()
 	}
-	spinnerView := m.spinner.View()
-	leftContent := fmt.Sprintf(
-		"\n\n   %s Loading forever... %s\n\n",
-		spinnerView,
-		quitKeys.Help().Desc,
-	)
+	x, y := activeStyle.GetFrameSize()
+	frameWidth := (m.width - x) / 2
+	frameHeight := m.height - y
+	x2, y2 := docStyle.GetFrameSize()
+	width := frameWidth - x2
+	height := frameHeight - y2
+	m.list.SetSize(width, height)
+	be := m.baseEnhancements[m.list.Index()]
+	cost, _ := ghec.NewEnhancement(be).WithLevel(m.level).WithPreviousEnhancements(m.prev).Cost()
+	m.list.Title = m.Title()
+	leftContent := docStyle.Width(width).Height(height).Render(m.list.View())
 	rightContent := fmt.Sprintf(
-		"\n\n    %d, %d",
+		`
+        m.height: %d, m.width: %d
+     frameHeight: %d, frameWidth: %d
+          height: %d,   width: %d
+         m.level: %d
+          m.prev: %d
+            Cost: %d
+    `,
 		m.height,
 		m.width,
+		frameHeight,
+		frameWidth,
+		height,
+		width,
+		m.level,
+		m.prev,
+		cost,
 	)
 	if m.state == quitting {
-		return leftContent + "\n"
+		return leftContent + "\nQuitting"
 	}
 	var left, right string
 	if m.state == focusRight {
-		left = inactiveStyle.Width(width).Height(height).Render(leftContent)
-		right = activeStyle.Width(width).Height(height).Render(rightContent)
+		left = inactiveStyle.Width(frameWidth).Height(frameHeight).Render(leftContent)
+		right = activeStyle.Width(frameWidth).Height(frameHeight).Render(rightContent)
 	} else {
-		left = activeStyle.Width(width).Height(height).Render(leftContent)
-		right = inactiveStyle.Width(width).Height(height).Render(rightContent)
+		left = activeStyle.Width(frameWidth).Height(frameHeight).Render(leftContent)
+		right = inactiveStyle.Width(frameWidth).Height(frameHeight).Render(rightContent)
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, left, right)
 }

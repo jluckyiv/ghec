@@ -33,7 +33,7 @@ var mapCmd = &cobra.Command{
 	Use:   "map",
 	Short: "run a map of enhancements",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%#v", ghec.Map(ghec.ToString))
+		fmt.Printf("%#v", ghec.Map(ghec.Title))
 	},
 }
 

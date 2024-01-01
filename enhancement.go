@@ -26,7 +26,7 @@ func NewEnhancement(baseEnhancement BaseEnhancement) enhancement {
 	return enhancement{
 		baseEnhancement:      baseEnhancement,
 		level:                Level1,
-		multipleTarget:       0,
+		multipleTarget:       1,
 		previousEnhancements: PreviousEnhancements0,
 	}
 }
@@ -49,6 +49,15 @@ func (e enhancement) WithLevel(level Level) enhancement {
 func (e enhancement) WithPreviousEnhancements(previousEnhancements PreviousEnhancements) enhancement {
 	e.previousEnhancements = previousEnhancements
 	return e
+}
+
+func DecrementPrevious(p PreviousEnhancements) PreviousEnhancements {
+	// add 4 to avoid negative numbers
+	return (p - 1 + 4) % 4
+}
+
+func IncrementPrevious(p PreviousEnhancements) PreviousEnhancements {
+	return (p + 1) % 4
 }
 
 // Cost calculates the cost of the enhancement.
@@ -115,60 +124,119 @@ const (
 	EnhanceSummonsHP
 )
 
-func ToString(be BaseEnhancement) string {
+func Title(be BaseEnhancement) string {
 	switch be {
 	case EnhanceMove:
-		return "+1 Move"
+		return "Move"
 	case EnhanceAttack:
-		return "+1 Attack"
+		return "Attack"
 	case EnhanceRange:
-		return "+1 Range"
+		return "Range"
 	case EnhanceShield:
-		return "+ Shield"
+		return "Shield"
 	case EnhancePush:
-		return "+ Push"
+		return "Push"
 	case EnhancePull:
-		return "+ Pull"
+		return "Pull"
 	case EnhancePierce:
-		return "+ Pierce"
+		return "Pierce"
 	case EnhanceRetaliate:
-		return "+ Retaliate"
+		return "Retaliate"
 	case EnhanceHeal:
-		return "+ Heal"
+		return "Heal"
 	case EnhanceTarget:
-		return "+1 Target"
+		return "Target"
 	case EnhancePoison:
-		return "+ Poison"
+		return "Poison"
 	case EnhanceWound:
-		return "+ Wound"
+		return "Wound"
 	case EnhanceMuddle:
-		return "+ Muddle"
+		return "Muddle"
 	case EnhanceImmobilize:
-		return "+ Immobilize"
+		return "Immobilize"
 	case EnhanceDisarm:
-		return "+ Disarm"
+		return "Disarm"
 	case EnhanceCurse:
-		return "+ Curse"
+		return "Curse"
 	case EnhanceStrengthen:
-		return "+ Strengthen"
+		return "Strengthen"
 	case EnhanceBless:
-		return "+ Bless"
+		return "Bless"
 	case EnhanceJump:
-		return "+ Jump"
+		return "Jump"
 	case EnhanceSpecificElement:
-		return "+ Specific Element"
+		return "Specific Element"
 	case EnhanceAnyElement:
-		return "+ Any Element"
+		return "Any Element"
 	case EnhanceSummonsMove:
-		return "+1 Summons Move"
+		return "Summons Move"
 	case EnhanceSummonsAttack:
-		return "+1 Summons Attack"
+		return "Summons Attack"
 	case EnhanceSummonsRange:
-		return "+1 Summons Range"
+		return "Summons Range"
 	case EnhanceSummonsHP:
-		return "+1 Summons HP"
+		return "Summons HP"
 	case EnhanceAddAttackHex:
-		return "+1 Attack Hex"
+		return "Add Hex"
+	default:
+		return "Unknown"
+	}
+}
+
+func Description(be BaseEnhancement) string {
+	switch be {
+	case EnhanceMove:
+		return "adds +1 to move"
+	case EnhanceAttack:
+		return "adds +1 modifier to attack"
+	case EnhanceRange:
+		return "adds +1 range to attack"
+	case EnhanceTarget:
+		return "adds +1 target to attack"
+	case EnhanceAddAttackHex:
+		return "adds +1 attack hex"
+	case EnhanceShield:
+		return "adds shield"
+	case EnhancePush:
+		return "adds push"
+	case EnhancePull:
+		return "adds pull"
+	case EnhancePierce:
+		return "adds pierce"
+	case EnhanceRetaliate:
+		return "adds retaliate"
+	case EnhanceHeal:
+		return "adds heal"
+	case EnhancePoison:
+		return "adds poison"
+	case EnhanceWound:
+		return "adds wound"
+	case EnhanceMuddle:
+		return "adds muddle"
+	case EnhanceImmobilize:
+		return "adds immobilize"
+	case EnhanceDisarm:
+		return "adds disarm"
+	case EnhanceCurse:
+		return "adds curse"
+	case EnhanceStrengthen:
+		return "adds strengthen"
+	case EnhanceBless:
+		return "adds bless"
+	case EnhanceJump:
+		return "adds jump"
+	case EnhanceSpecificElement:
+		return "adds specific element"
+	case EnhanceAnyElement:
+		return "adds any element"
+	case EnhanceSummonsMove:
+		return "adds +1 move to summons"
+	case EnhanceSummonsAttack:
+		return "adds +1 modifier to summons attack"
+	case EnhanceSummonsRange:
+		return "adds +1 range to summons attack"
+	case EnhanceSummonsHP:
+		return "adds +1 to summons HP"
 	default:
 		return "Unknown"
 	}
@@ -220,6 +288,9 @@ func (e enhancement) costForBaseEnhancement() (Cost, error) {
 	var cost Cost
 	switch e.baseEnhancement {
 	case EnhanceAddAttackHex:
+		if e.multipleTarget == 0 {
+			return 0, fmt.Errorf("e.multipleTarget is 0")
+		}
 		return Cost(200 / e.multipleTarget), nil
 	case EnhanceMove:
 		cost = 30

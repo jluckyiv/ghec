@@ -33,7 +33,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list all enhancements",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%#v", ghec.List(ghec.ToString))
+		fmt.Printf("%#v", ghec.List(ghec.Title))
 	},
 }
 
