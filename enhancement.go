@@ -88,31 +88,31 @@ type BaseEnhancement int
 // They are exported for type safety.
 const (
 	EnhanceMove BaseEnhancement = iota
+	EnhanceJump
 	EnhanceAttack
 	EnhanceRange
-	EnhanceShield
-	EnhancePush
-	EnhancePull
-	EnhancePierce
-	EnhanceRetaliate
-	EnhanceHeal
 	EnhanceTarget
+	EnhanceAddAttackHex
+	EnhanceHeal
+	EnhanceShield
+	EnhanceRetaliate
+	EnhanceStrengthen
+	EnhanceMuddle
+	EnhanceDisarm
+	EnhancePierce
 	EnhancePoison
 	EnhanceWound
-	EnhanceMuddle
+	EnhancePush
+	EnhancePull
 	EnhanceImmobilize
-	EnhanceDisarm
 	EnhanceCurse
-	EnhanceStrengthen
 	EnhanceBless
-	EnhanceJump
 	EnhanceSpecificElement
 	EnhanceAnyElement
 	EnhanceSummonsMove
 	EnhanceSummonsAttack
 	EnhanceSummonsRange
 	EnhanceSummonsHP
-	EnhanceAddAttackHex
 )
 
 func ToString(be BaseEnhancement) string {
