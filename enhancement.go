@@ -205,6 +205,15 @@ func Map[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
 	}
 }
 
+func List[T any](f func(BaseEnhancement) T) []T {
+	m := Map(f)
+	list := make([]T, len(m))
+	for k, v := range m {
+		list[k] = v
+	}
+	return list
+}
+
 // costForBaseEnhancement is a helper function that returns the base cost for
 // the base enhancement.
 func (e enhancement) costForBaseEnhancement() (Cost, error) {
