@@ -118,57 +118,57 @@ const (
 func ToString(be BaseEnhancement) string {
 	switch be {
 	case EnhanceMove:
-		return "Move"
+		return "+1 Move"
 	case EnhanceAttack:
-		return "Attack"
+		return "+1 Attack"
 	case EnhanceRange:
-		return "Range"
+		return "+1 Range"
 	case EnhanceShield:
-		return "Shield"
+		return "+ Shield"
 	case EnhancePush:
-		return "Push"
+		return "+ Push"
 	case EnhancePull:
-		return "Pull"
+		return "+ Pull"
 	case EnhancePierce:
-		return "Pierce"
+		return "+ Pierce"
 	case EnhanceRetaliate:
-		return "Retaliate"
+		return "+ Retaliate"
 	case EnhanceHeal:
-		return "Heal"
+		return "+ Heal"
 	case EnhanceTarget:
-		return "Target"
+		return "+1 Target"
 	case EnhancePoison:
-		return "Poison"
+		return "+ Poison"
 	case EnhanceWound:
-		return "Wound"
+		return "+ Wound"
 	case EnhanceMuddle:
-		return "Muddle"
+		return "+ Muddle"
 	case EnhanceImmobilize:
-		return "Immobilize"
+		return "+ Immobilize"
 	case EnhanceDisarm:
-		return "Disarm"
+		return "+ Disarm"
 	case EnhanceCurse:
-		return "Curse"
+		return "+ Curse"
 	case EnhanceStrengthen:
-		return "Strengthen"
+		return "+ Strengthen"
 	case EnhanceBless:
-		return "Bless"
+		return "+ Bless"
 	case EnhanceJump:
-		return "Jump"
+		return "+ Jump"
 	case EnhanceSpecificElement:
-		return "Specific Element"
+		return "+ Specific Element"
 	case EnhanceAnyElement:
-		return "Any Element"
+		return "+ Any Element"
 	case EnhanceSummonsMove:
-		return "Summons Move"
+		return "+1 Summons Move"
 	case EnhanceSummonsAttack:
-		return "Summons Attack"
+		return "+1 Summons Attack"
 	case EnhanceSummonsRange:
-		return "Summons Range"
+		return "+1 Summons Range"
 	case EnhanceSummonsHP:
-		return "Summons HP"
+		return "+1 Summons HP"
 	case EnhanceAddAttackHex:
-		return "Add Attack Hex"
+		return "+1 Attack Hex"
 	default:
 		return "Unknown"
 	}
