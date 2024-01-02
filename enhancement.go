@@ -22,6 +22,7 @@ type enhancement struct {
 }
 
 // NewEnhancement creates a new enhancement to calculate its cost.
+// TODO: Use function options instead of With* methods.
 func NewEnhancement(baseEnhancement BaseEnhancement) enhancement {
 	return enhancement{
 		baseEnhancement:      baseEnhancement,
@@ -302,6 +303,14 @@ func Map[T comparable](f func(BaseEnhancement) T) map[T]BaseEnhancement {
 		f(EnhanceSummonsHP):       EnhanceSummonsHP,
 		f(EnhanceAddAttackHex):    EnhanceAddAttackHex,
 	}
+}
+
+func identity(be BaseEnhancement) BaseEnhancement {
+	return be
+}
+
+func BaseEnhancements() []BaseEnhancement {
+	return List(identity)
 }
 
 func List[T any](f func(BaseEnhancement) T) []T {

@@ -52,27 +52,48 @@ var targetKeys = key.NewBinding(
 )
 
 type model struct {
-	list             list.Model
-	err              error
-	baseEnhancements map[string]ghec.BaseEnhancement
-	state            state
-	height           int
-	width            int
-	level            ghec.Level
-	prev             ghec.PreviousEnhancements
-	targets          int
+	err error
+	// list holds a list of items and a delegate for rendering the list.
+	list list.Model
+	// data holds the base enhancements for the list.
+	// Because the list.Model can't return the base enhancement, the
+	// data map is used to look up the base enhancement from the list item.
+	// The key is the list item's FilterValue(), because that's the only
+	// method in the list.Item interface.
+	data map[string]ghec.BaseEnhancement
+	// level is the card level, which affects the enhancement cost.
+	level ghec.Level
+	// prev is the number of previous enhancements on the card, which affects the
+	// enhancement cost.
+	prev ghec.PreviousEnhancements
+	// targets is the current number of targets on the card.
+	// Multiple targets double the enhancement cost and adding a hex applies a
+	// formula based on the number of targets.
+	targets int
+	// state is the current state of the UI.
+	state state
+	// width and height are the current terminal dimensions.
+	width  int
+	height int
 }
 
 func initialModel() model {
-	identity := func(be ghec.BaseEnhancement) ghec.BaseEnhancement {
-		return be
+	// Get a temporary list of the base enhancements.
+	baseEnhancements := ghec.BaseEnhancements()
+	// Use a map instead of a slice to look up the base enhancement.
+	// Don't use a slice because the Index() method of the list.Model
+	// returns the index of the selected item from the visible items,
+	// not the index from the original list.
+	data := make(map[string]ghec.BaseEnhancement)
+	items := make([]list.Item, len(baseEnhancements))
+	// Assign the base enhancements to the list items and the data map
+	// from the same loop.
+	for i, be := range baseEnhancements {
+		item := newItem(be)
+		items[i] = item
+		data[item.FilterValue()] = baseEnhancements[i]
 	}
-	bb := ghec.List(identity)
-	items := ghec.List(newItem)
-	baseEnhancements := map[string]ghec.BaseEnhancement{}
-	for i, be := range items {
-		baseEnhancements[be.FilterValue()] = bb[i]
-	}
+	// Create the list.Model.
 	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
 	l.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
@@ -89,20 +110,26 @@ func initialModel() model {
 		}
 	}
 	m := model{
-		list: l, state: loading, level: 1, prev: 0, targets: 1,
-		baseEnhancements: baseEnhancements,
+		list:    l,
+		data:    data,
+		level:   1,
+		prev:    0,
+		targets: 1,
+		state:   loading,
 	}
 	return m
 }
 
 func (m model) Title() string {
+	title := fmt.Sprintf(
+		"Level: %d, Targets: %d, Previous: %d",
+		m.level, m.targets, m.prev,
+	)
 	cost, err := m.cost()
 	if err != nil {
-		return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %s",
-			m.level, m.targets, m.prev, "invalid")
+		return title
 	}
-	return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %d",
-		m.level, m.targets, m.prev, cost)
+	return fmt.Sprintf("%s, Cost: %d", title, cost)
 }
 
 func (m model) cost() (ghec.Cost, error) {
@@ -110,7 +137,7 @@ func (m model) cost() (ghec.Cost, error) {
 	if selected == nil {
 		return ghec.Cost(0), fmt.Errorf("no base enhancement selected")
 	}
-	be, ok := m.baseEnhancements[selected.FilterValue()]
+	be, ok := m.data[selected.FilterValue()]
 	if !ok {
 		return ghec.Cost(0), fmt.Errorf("base enhancement not found")
 	}
@@ -131,13 +158,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
+	case errMsg:
+		m.err = msg
+		return m, nil
+
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
 		m.width = msg.Width
-		return m, nil
-
-	case errMsg:
-		m.err = msg
 		return m, nil
 
 	case tea.KeyMsg:
@@ -180,18 +207,21 @@ func (m model) View() string {
 	if m.err != nil {
 		return m.err.Error()
 	}
-	x, y := activeStyle.GetFrameSize()
-	frameWidth := (m.width - x) / 2
-	frameHeight := m.height - y
-	x2, y2 := docStyle.GetFrameSize()
-	width := frameWidth - x2
-	height := frameHeight - y2
-	m.list.SetSize(width, height)
+	w, h := activeStyle.GetFrameSize()
+	frameWidth := (m.width - w) / 2
+	frameHeight := m.height - h
+	w2, h2 := docStyle.GetFrameSize()
+	width := frameWidth - w2
+	height := frameHeight - h2
+	m.list.SetWidth(width)
+	m.list.SetHeight(height)
 	m.list.Title = m.Title()
-	leftContent := docStyle.Width(width).Height(height).Render(m.list.View())
+	leftContent := docStyle.
+		Width(width).
+		Height(height).
+		Render(m.list.View())
 	cost, _ := m.cost()
 	rightContent := fmt.Sprintf(
-
 		`
         m.height: %d, m.width: %d
      frameHeight: %d, frameWidth: %d
