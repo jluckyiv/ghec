@@ -54,7 +54,7 @@ var targetKeys = key.NewBinding(
 type model struct {
 	list             list.Model
 	err              error
-	baseEnhancements []ghec.BaseEnhancement
+	baseEnhancements map[string]ghec.BaseEnhancement
 	state            state
 	height           int
 	width            int
@@ -64,9 +64,15 @@ type model struct {
 }
 
 func initialModel() model {
-	identity := func(be ghec.BaseEnhancement) ghec.BaseEnhancement { return be }
-	baseEnhancements := ghec.List(identity)
+	identity := func(be ghec.BaseEnhancement) ghec.BaseEnhancement {
+		return be
+	}
+	bb := ghec.List(identity)
 	items := ghec.List(newItem)
+	baseEnhancements := map[string]ghec.BaseEnhancement{}
+	for i, be := range items {
+		baseEnhancements[be.FilterValue()] = bb[i]
+	}
 	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
 	l.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
@@ -90,18 +96,29 @@ func initialModel() model {
 }
 
 func (m model) Title() string {
+	cost, err := m.cost()
+	if err != nil {
+		return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %s",
+			m.level, m.targets, m.prev, "invalid")
+	}
 	return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %d",
-		m.level, m.targets, m.prev, m.cost())
+		m.level, m.targets, m.prev, cost)
 }
 
-func (m model) cost() ghec.Cost {
-	be := m.baseEnhancements[m.list.Index()]
-	cost, _ := ghec.NewEnhancement(be).
+func (m model) cost() (ghec.Cost, error) {
+	selected := m.list.SelectedItem()
+	if selected == nil {
+		return ghec.Cost(0), fmt.Errorf("no base enhancement selected")
+	}
+	be, ok := m.baseEnhancements[selected.FilterValue()]
+	if !ok {
+		return ghec.Cost(0), fmt.Errorf("base enhancement not found")
+	}
+	return ghec.NewEnhancement(be).
 		WithLevel(m.level).
 		WithPreviousEnhancements(m.prev).
 		WithMultipleTarget(m.targets).
 		Cost()
-	return cost
 }
 
 func (m model) Init() tea.Cmd {
@@ -172,13 +189,17 @@ func (m model) View() string {
 	m.list.SetSize(width, height)
 	m.list.Title = m.Title()
 	leftContent := docStyle.Width(width).Height(height).Render(m.list.View())
+	cost, _ := m.cost()
 	rightContent := fmt.Sprintf(
+
 		`
         m.height: %d, m.width: %d
      frameHeight: %d, frameWidth: %d
           height: %d,   width: %d
          m.level: %d
           m.prev: %d
+         index(): %d
+    selectedItem: %s
             Cost: %d
     `,
 		m.height,
@@ -189,7 +210,9 @@ func (m model) View() string {
 		width,
 		m.level,
 		m.prev,
-		m.cost(),
+		m.list.Index(),
+		m.list.SelectedItem(),
+		cost,
 	)
 	if m.state == quitting {
 		return leftContent + "\nQuitting"

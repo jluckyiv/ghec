@@ -242,7 +242,7 @@ func Description(be BaseEnhancement) string {
 	}
 }
 
-func Map[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
+func ReverseMap[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
 	return map[BaseEnhancement]T{
 		EnhanceMove:            f(EnhanceMove),
 		EnhanceAttack:          f(EnhanceAttack),
@@ -273,8 +273,39 @@ func Map[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
 	}
 }
 
+func Map[T comparable](f func(BaseEnhancement) T) map[T]BaseEnhancement {
+	return map[T]BaseEnhancement{
+		f(EnhanceMove):            EnhanceMove,
+		f(EnhanceAttack):          EnhanceAttack,
+		f(EnhanceRange):           EnhanceRange,
+		f(EnhanceShield):          EnhanceShield,
+		f(EnhancePush):            EnhancePush,
+		f(EnhancePull):            EnhancePull,
+		f(EnhancePierce):          EnhancePierce,
+		f(EnhanceRetaliate):       EnhanceRetaliate,
+		f(EnhanceHeal):            EnhanceHeal,
+		f(EnhanceTarget):          EnhanceTarget,
+		f(EnhancePoison):          EnhancePoison,
+		f(EnhanceWound):           EnhanceWound,
+		f(EnhanceMuddle):          EnhanceMuddle,
+		f(EnhanceImmobilize):      EnhanceImmobilize,
+		f(EnhanceDisarm):          EnhanceDisarm,
+		f(EnhanceCurse):           EnhanceCurse,
+		f(EnhanceStrengthen):      EnhanceStrengthen,
+		f(EnhanceBless):           EnhanceBless,
+		f(EnhanceJump):            EnhanceJump,
+		f(EnhanceSpecificElement): EnhanceSpecificElement,
+		f(EnhanceAnyElement):      EnhanceAnyElement,
+		f(EnhanceSummonsMove):     EnhanceSummonsMove,
+		f(EnhanceSummonsAttack):   EnhanceSummonsAttack,
+		f(EnhanceSummonsRange):    EnhanceSummonsRange,
+		f(EnhanceSummonsHP):       EnhanceSummonsHP,
+		f(EnhanceAddAttackHex):    EnhanceAddAttackHex,
+	}
+}
+
 func List[T any](f func(BaseEnhancement) T) []T {
-	m := Map(f)
+	m := ReverseMap(f)
 	list := make([]T, len(m))
 	for k, v := range m {
 		list[k] = v
@@ -335,13 +366,13 @@ func (e enhancement) costForBaseEnhancement() (Cost, error) {
 	case EnhanceAnyElement:
 		cost = 150
 	case EnhanceSummonsMove:
-		cost = 100
+		return Cost(100), nil
 	case EnhanceSummonsAttack:
-		cost = 100
+		return Cost(100), nil
 	case EnhanceSummonsRange:
-		cost = 50
+		return Cost(50), nil
 	case EnhanceSummonsHP:
-		cost = 50
+		return Cost(50), nil
 	default:
 		return 0, fmt.Errorf("unknown base enhancement %d", e.baseEnhancement)
 	}
