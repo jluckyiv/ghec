@@ -49,11 +49,14 @@ var rootCmd = &cobra.Command{
 
 // run is a helper function for the subcommands, which are similar.
 func run(be ghec.BaseEnhancement, desc string) {
+	l := ghec.Level(level)
+	pe := ghec.PreviousEnhancements(previousEnhancements)
 	e := ghec.
-		NewEnhancement(be).
-		WithMultipleTarget(numTargets).
-		WithLevel(ghec.Level(level)).
-		WithPreviousEnhancements(ghec.PreviousEnhancements(previousEnhancements))
+		NewEnhancement(be,
+			ghec.OptionWithLevel(l),
+			ghec.OptionWithMultipleTarget(numTargets),
+			ghec.OptionWithPreviousEnhancements(ghec.PreviousEnhancements(pe)),
+		)
 	cost, err := e.Cost()
 	cobra.CheckErr(err)
 	fmt.Printf("%s costs %d", desc, cost)

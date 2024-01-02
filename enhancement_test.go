@@ -66,12 +66,13 @@ var testCases []testCase = []testCase{
 	},
 }
 
-func TestEnhance(t *testing.T) {
+func TestFunctionalOptionsAPI(t *testing.T) {
 	for _, tc := range testCases {
-		input := ghec.NewEnhancement(tc.base).
-			WithLevel(tc.level).
-			WithMultipleTarget(tc.targets).
-			WithPreviousEnhancements(tc.prev)
+		input := ghec.NewEnhancement(tc.base,
+			ghec.OptionWithLevel(tc.level),
+			ghec.OptionWithMultipleTarget(tc.targets),
+			ghec.OptionWithPreviousEnhancements(tc.prev),
+		)
 
 		actual, _ := input.Cost()
 		if actual != tc.expected {

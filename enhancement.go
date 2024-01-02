@@ -21,44 +21,57 @@ type enhancement struct {
 	previousEnhancements PreviousEnhancements
 }
 
-// NewEnhancement creates a new enhancement to calculate its cost.
+// newEnhancement creates a new enhancement to calculate its cost.
 // TODO: Use function options instead of With* methods.
-func NewEnhancement(baseEnhancement BaseEnhancement) enhancement {
+func newEnhancement(be BaseEnhancement) enhancement {
 	return enhancement{
-		baseEnhancement:      baseEnhancement,
+		baseEnhancement:      be,
 		level:                Level1,
 		multipleTarget:       1,
 		previousEnhancements: PreviousEnhancements0,
 	}
 }
 
-// WithMultipleTarget sets the number of targets for the enhancement.
-// It also sets the number of current hexes for Add Attack Hex enhancements.
-func (e enhancement) WithMultipleTarget(multipleTarget int) enhancement {
-	e.multipleTarget = multipleTarget
-	return e
+type Option func(*enhancement)
+
+func NewEnhancement(be BaseEnhancement, options ...Option) *enhancement {
+	e := newEnhancement(be)
+	for _, option := range options {
+		option(&e)
+	}
+	return &e
 }
 
 // WithLevel sets the level of the ability card for the enhancement.
-func (e enhancement) WithLevel(level Level) enhancement {
-	e.level = level
-	return e
+func OptionWithLevel(level Level) Option {
+	return func(e *enhancement) {
+		e.level = level
+	}
+}
+
+// WithMultipleTarget sets the number of targets for the enhancement.
+// It also sets the number of current hexes for Add Attack Hex enhancements.
+func OptionWithMultipleTarget(mt int) Option {
+	return func(e *enhancement) {
+		e.multipleTarget = mt
+	}
 }
 
 // WithPreviousEnhancements sets the number of previous enhancements on the
 // card.
-func (e enhancement) WithPreviousEnhancements(previousEnhancements PreviousEnhancements) enhancement {
-	e.previousEnhancements = previousEnhancements
-	return e
+func OptionWithPreviousEnhancements(pe PreviousEnhancements) Option {
+	return func(e *enhancement) {
+		e.previousEnhancements = pe
+	}
 }
 
-func DecrementPrevious(p PreviousEnhancements) PreviousEnhancements {
+func DecrementPrevious(pe PreviousEnhancements) PreviousEnhancements {
 	// add 4 to avoid negative numbers
-	return (p - 1 + 4) % 4
+	return (pe - 1 + 4) % 4
 }
 
-func IncrementPrevious(p PreviousEnhancements) PreviousEnhancements {
-	return (p + 1) % 4
+func IncrementPrevious(pe PreviousEnhancements) PreviousEnhancements {
+	return (pe + 1) % 4
 }
 
 // Cost calculates the cost of the enhancement.
@@ -98,31 +111,34 @@ type BaseEnhancement int
 // They are exported for type safety.
 const (
 	EnhanceMove BaseEnhancement = iota
-	EnhanceJump
 	EnhanceAttack
 	EnhanceRange
-	EnhanceTarget
-	EnhanceAddAttackHex
-	EnhanceHeal
 	EnhanceShield
-	EnhanceRetaliate
-	EnhanceStrengthen
-	EnhanceMuddle
-	EnhanceDisarm
-	EnhancePierce
-	EnhancePoison
-	EnhanceWound
 	EnhancePush
 	EnhancePull
-	EnhanceImmobilize
-	EnhanceCurse
-	EnhanceBless
-	EnhanceSpecificElement
-	EnhanceAnyElement
+	EnhancePierce
+	EnhanceRetaliate
+	EnhanceHeal
+	EnhanceTarget
+
 	EnhanceSummonsMove
 	EnhanceSummonsAttack
 	EnhanceSummonsRange
 	EnhanceSummonsHP
+
+	EnhanceAddAttackHex
+
+	EnhancePoison
+	EnhanceWound
+	EnhanceMuddle
+	EnhanceImmobilize
+	EnhanceDisarm
+	EnhanceCurse
+	EnhanceStrengthen
+	EnhanceBless
+	EnhanceJump
+	EnhanceSpecificElement
+	EnhanceAnyElement
 )
 
 func Title(be BaseEnhancement) string {
@@ -187,59 +203,59 @@ func Title(be BaseEnhancement) string {
 func Description(be BaseEnhancement) string {
 	switch be {
 	case EnhanceMove:
-		return "adds +1 to move"
+		return fmt.Sprintf("enhance +1 move (%s)", costForBaseEnhancement(be))
 	case EnhanceAttack:
-		return "adds +1 modifier to attack"
+		return fmt.Sprintf("enhance +1 attack (%s)", costForBaseEnhancement(be))
 	case EnhanceRange:
-		return "adds +1 range to attack"
-	case EnhanceTarget:
-		return "adds +1 target to attack"
-	case EnhanceAddAttackHex:
-		return "adds +1 attack hex"
+		return fmt.Sprintf("enhance +1 range (%s)", costForBaseEnhancement(be))
 	case EnhanceShield:
-		return "adds shield"
+		return fmt.Sprintf("enhance +1 shield (%s)", costForBaseEnhancement(be))
 	case EnhancePush:
-		return "adds push"
+		return fmt.Sprintf("enhance +1 push (%s)", costForBaseEnhancement(be))
 	case EnhancePull:
-		return "adds pull"
+		return fmt.Sprintf("enhance +1 pull (%s)", costForBaseEnhancement(be))
 	case EnhancePierce:
-		return "adds pierce"
+		return fmt.Sprintf("enhance +1 pierce (%s)", costForBaseEnhancement(be))
 	case EnhanceRetaliate:
-		return "adds retaliate"
+		return fmt.Sprintf("enhance +1 retaliate (%s)", costForBaseEnhancement(be))
 	case EnhanceHeal:
-		return "adds heal"
-	case EnhancePoison:
-		return "adds poison"
-	case EnhanceWound:
-		return "adds wound"
-	case EnhanceMuddle:
-		return "adds muddle"
-	case EnhanceImmobilize:
-		return "adds immobilize"
-	case EnhanceDisarm:
-		return "adds disarm"
-	case EnhanceCurse:
-		return "adds curse"
-	case EnhanceStrengthen:
-		return "adds strengthen"
-	case EnhanceBless:
-		return "adds bless"
-	case EnhanceJump:
-		return "adds jump"
-	case EnhanceSpecificElement:
-		return "adds specific element"
-	case EnhanceAnyElement:
-		return "adds any element"
+		return fmt.Sprintf("enhance +1 heal (%s)", costForBaseEnhancement(be))
+	case EnhanceTarget:
+		return fmt.Sprintf("enhance +1 target (%s)", costForBaseEnhancement(be))
+	case EnhanceAddAttackHex:
+		return fmt.Sprintf("add attack hex (%s)", costForBaseEnhancement(be))
 	case EnhanceSummonsMove:
-		return "adds +1 move to summons"
+		return fmt.Sprintf("enhance summons +1 move (%s)", costForBaseEnhancement(be))
 	case EnhanceSummonsAttack:
-		return "adds +1 modifier to summons attack"
+		return fmt.Sprintf("enhance summons +1 attack (%s)", costForBaseEnhancement(be))
 	case EnhanceSummonsRange:
-		return "adds +1 range to summons attack"
+		return fmt.Sprintf("enhance summons +1 range (%s)", costForBaseEnhancement(be))
 	case EnhanceSummonsHP:
-		return "adds +1 to summons HP"
+		return fmt.Sprintf("enhance summons +1 HP (%s)", costForBaseEnhancement(be))
+	case EnhancePoison:
+		return fmt.Sprintf("add poison effect (%s)", costForBaseEnhancement(be))
+	case EnhanceWound:
+		return fmt.Sprintf("add wound effect (%s)", costForBaseEnhancement(be))
+	case EnhanceMuddle:
+		return fmt.Sprintf("add muddle effect (%s)", costForBaseEnhancement(be))
+	case EnhanceImmobilize:
+		return fmt.Sprintf("add immobilize effect (%s)", costForBaseEnhancement(be))
+	case EnhanceDisarm:
+		return fmt.Sprintf("add disarm effect (%s)", costForBaseEnhancement(be))
+	case EnhanceCurse:
+		return fmt.Sprintf("add curse effect (%s)", costForBaseEnhancement(be))
+	case EnhanceStrengthen:
+		return fmt.Sprintf("add strengthen effect (%s)", costForBaseEnhancement(be))
+	case EnhanceBless:
+		return fmt.Sprintf("add bless effect (%s)", costForBaseEnhancement(be))
+	case EnhanceJump:
+		return fmt.Sprintf("add jump effect (%s)", costForBaseEnhancement(be))
+	case EnhanceSpecificElement:
+		return fmt.Sprintf("add effect: specific element (%s)", costForBaseEnhancement(be))
+	case EnhanceAnyElement:
+		return fmt.Sprintf("add effect: any element (%s)", costForBaseEnhancement(be))
 	default:
-		return "Unknown"
+		return "unknown effect"
 	}
 }
 
@@ -255,6 +271,11 @@ func ReverseMap[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
 		EnhanceRetaliate:       f(EnhanceRetaliate),
 		EnhanceHeal:            f(EnhanceHeal),
 		EnhanceTarget:          f(EnhanceTarget),
+		EnhanceAddAttackHex:    f(EnhanceAddAttackHex),
+		EnhanceSummonsMove:     f(EnhanceSummonsMove),
+		EnhanceSummonsAttack:   f(EnhanceSummonsAttack),
+		EnhanceSummonsRange:    f(EnhanceSummonsRange),
+		EnhanceSummonsHP:       f(EnhanceSummonsHP),
 		EnhancePoison:          f(EnhancePoison),
 		EnhanceWound:           f(EnhanceWound),
 		EnhanceMuddle:          f(EnhanceMuddle),
@@ -266,11 +287,6 @@ func ReverseMap[T any](f func(BaseEnhancement) T) map[BaseEnhancement]T {
 		EnhanceJump:            f(EnhanceJump),
 		EnhanceSpecificElement: f(EnhanceSpecificElement),
 		EnhanceAnyElement:      f(EnhanceAnyElement),
-		EnhanceSummonsMove:     f(EnhanceSummonsMove),
-		EnhanceSummonsAttack:   f(EnhanceSummonsAttack),
-		EnhanceSummonsRange:    f(EnhanceSummonsRange),
-		EnhanceSummonsHP:       f(EnhanceSummonsHP),
-		EnhanceAddAttackHex:    f(EnhanceAddAttackHex),
 	}
 }
 
@@ -324,6 +340,65 @@ func List[T any](f func(BaseEnhancement) T) []T {
 
 // costForBaseEnhancement is a helper function that returns the base cost for
 // the base enhancement.
+func costForBaseEnhancement(be BaseEnhancement) string {
+	var cost int
+	switch be {
+	case EnhanceMove:
+		cost = 30
+	case EnhanceAttack:
+		cost = 50
+	case EnhanceRange:
+		cost = 30
+	case EnhanceShield:
+		cost = 100
+	case EnhancePush:
+		cost = 30
+	case EnhancePull:
+		cost = 30
+	case EnhancePierce:
+		cost = 30
+	case EnhanceRetaliate:
+		cost = 100
+	case EnhanceHeal:
+		cost = 30
+	case EnhanceTarget:
+		cost = 50
+	case EnhanceAddAttackHex:
+		return "200g / current target hexes"
+	case EnhancePoison:
+		cost = 75
+	case EnhanceWound:
+		cost = 75
+	case EnhanceMuddle:
+		cost = 50
+	case EnhanceImmobilize:
+		cost = 100
+	case EnhanceDisarm:
+		cost = 150
+	case EnhanceCurse:
+		cost = 75
+	case EnhanceStrengthen:
+		cost = 50
+	case EnhanceBless:
+		cost = 50
+	case EnhanceJump:
+		cost = 50
+	case EnhanceSpecificElement:
+		cost = 100
+	case EnhanceAnyElement:
+		cost = 150
+	case EnhanceSummonsMove:
+		cost = 100
+	case EnhanceSummonsAttack:
+		cost = 100
+	case EnhanceSummonsRange:
+		cost = 50
+	case EnhanceSummonsHP:
+		cost = 50
+	}
+	return fmt.Sprintf("%dg", cost)
+}
+
 func (e enhancement) costForBaseEnhancement() (Cost, error) {
 	var cost Cost
 	switch e.baseEnhancement {
@@ -375,13 +450,13 @@ func (e enhancement) costForBaseEnhancement() (Cost, error) {
 	case EnhanceAnyElement:
 		cost = 150
 	case EnhanceSummonsMove:
-		return Cost(100), nil
+		return 100, nil
 	case EnhanceSummonsAttack:
-		return Cost(100), nil
+		return 100, nil
 	case EnhanceSummonsRange:
-		return Cost(50), nil
+		return 50, nil
 	case EnhanceSummonsHP:
-		return Cost(50), nil
+		return 50, nil
 	default:
 		return 0, fmt.Errorf("unknown base enhancement %d", e.baseEnhancement)
 	}
