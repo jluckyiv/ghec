@@ -40,6 +40,14 @@ var testCases []testCase = []testCase{
 		prev:     ghec.PreviousEnhancements1,
 		expected: ghec.Cost(135),
 	},
+	{
+		name:     "add target, level 2, previous 0",
+		base:     ghec.EnhanceTarget,
+		targets:  3,
+		level:    ghec.Level2,
+		prev:     ghec.PreviousEnhancements0,
+		expected: ghec.Cost(125),
+	},
 }
 
 func TestEnhance(t *testing.T) {

@@ -90,9 +90,18 @@ func initialModel() model {
 }
 
 func (m model) Title() string {
+	return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %d",
+		m.level, m.targets, m.prev, m.cost())
+}
+
+func (m model) cost() ghec.Cost {
 	be := m.baseEnhancements[m.list.Index()]
-	cost, _ := ghec.NewEnhancement(be).WithLevel(m.level).WithPreviousEnhancements(m.prev).Cost()
-	return fmt.Sprintf("Level: %d, Targets: %d, Previous: %d, Cost: %d", m.level, m.targets, m.prev, cost)
+	cost, _ := ghec.NewEnhancement(be).
+		WithLevel(m.level).
+		WithPreviousEnhancements(m.prev).
+		WithMultipleTarget(m.targets).
+		Cost()
+	return cost
 }
 
 func (m model) Init() tea.Cmd {
@@ -161,8 +170,6 @@ func (m model) View() string {
 	width := frameWidth - x2
 	height := frameHeight - y2
 	m.list.SetSize(width, height)
-	be := m.baseEnhancements[m.list.Index()]
-	cost, _ := ghec.NewEnhancement(be).WithLevel(m.level).WithPreviousEnhancements(m.prev).Cost()
 	m.list.Title = m.Title()
 	leftContent := docStyle.Width(width).Height(height).Render(m.list.View())
 	rightContent := fmt.Sprintf(
@@ -182,7 +189,7 @@ func (m model) View() string {
 		width,
 		m.level,
 		m.prev,
-		cost,
+		m.cost(),
 	)
 	if m.state == quitting {
 		return leftContent + "\nQuitting"
