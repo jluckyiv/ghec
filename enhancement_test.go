@@ -48,6 +48,22 @@ var testCases []testCase = []testCase{
 		prev:     ghec.PreviousEnhancements0,
 		expected: ghec.Cost(125),
 	},
+	{
+		name:     "add summons move, level 1, previous 1",
+		base:     ghec.EnhanceSummonsMove,
+		targets:  1,
+		level:    ghec.Level1,
+		prev:     ghec.PreviousEnhancements1,
+		expected: ghec.Cost(175),
+	},
+	{
+		name:     "add summons range, level 1, previous 1",
+		base:     ghec.EnhanceSummonsRange,
+		targets:  1,
+		level:    ghec.Level1,
+		prev:     ghec.PreviousEnhancements1,
+		expected: ghec.Cost(125),
+	},
 }
 
 func TestEnhance(t *testing.T) {
@@ -59,7 +75,7 @@ func TestEnhance(t *testing.T) {
 
 		actual, _ := input.Cost()
 		if actual != tc.expected {
-			t.Fatalf("Expected %d, got %d", tc.expected, actual)
+			t.Fatalf("%s; expected %d, got %d", tc.name, tc.expected, actual)
 		}
 	}
 }
