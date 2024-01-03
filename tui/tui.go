@@ -30,6 +30,11 @@ var (
 			BorderForeground(lipgloss.Color("205"))
 )
 
+var quitKeys = key.NewBinding(
+	key.WithKeys("esc", "q"),
+	key.WithHelp("esc/q", "quit"),
+)
+
 var levelKeys = key.NewBinding(
 	key.WithKeys("1", "2", "3", "4", "5", "6", "7", "8", "9"),
 	key.WithHelp("1–9", "card lvl"),
@@ -164,6 +169,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		if key.Matches(msg, quitKeys) && !m.list.IsFiltered() {
+			if m.level == 1 && m.targets == 1 && m.prev == 0 {
+				m.state = quitting
+				return m, tea.Quit
+			}
+			m.level = 1
+			m.targets = 1
+			m.prev = 0
+			return m, nil
+		}
+
 		if key.Matches(msg, levelKeys) {
 			if l, err := strconv.Atoi(msg.String()); err == nil {
 				m.level = ghec.Level(l)
