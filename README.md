@@ -13,7 +13,7 @@ The test suite covers the [example from the rulebook](#example-from-the-rulebook
 There are non-CLI solutions to calculate enhancement costs and some are
 listed in the
 [GloomTactics Gloomhaven Enhancement guide](https://gloomtactics.blogspot.com/2020/08/gloomhaven-enhancement-guide.html).
-There are non-CLI solutions like
+Examples include
 the [The Arcane Library](https://ninjawithkillmoon.github.io/utilities/enhancementCalculator),
 the [Gloomhaven Companion app](https://play.google.com/store/apps/details?id=tomkatcreative.gloomhavenenhancementcalc&pli=1),
 and the [Gloomhaven Enhancement Calculator Excel spreadsheet](https://boardgamegeek.com/filepage/145329/enhancement-calculator).
@@ -93,18 +93,19 @@ For the second example, use the `ghec hex` command with the `--previous` flag.
 ghec hex --level 3 --targets 3 --previous 1 # 191
 ```
 
-In the TUI, the level and targets are already set. Press `p` to increment the
-number of previous enhancements to 1, then filter or scroll to the "Add hex"
-enhancement. The cost is shown in the title bar.
+In the TUI, the level and targets are already set from the previous calculation
+. Press `p` to increment the number of previous enhancements to 1, then filter
+or scroll to the "Add hex" enhancement. The cost is shown in the title bar.
 
 ### Multiple targets and adding a hex
 
-In the examples above, the attack is an AoE attack covering three hexes, so
-the `--targets` flag is set to 3. The `--targets` numerical value does not
-directly affect the cost of the first enhancement ("Attack"), but it tells the
-CLI to apply the multiple targets cost multiplier (2x). In the second example,
-the CLI uses the `--targets` numerical value to calculate the cost of the additional
-hex (200/number of current hexes).
+In the examples above, the attack is an AoE covering three hexes, so the `--
+targets` flag is set to 3. The `--targets` numerical value does not directly
+affect the cost of the first enhancement ("Attack"), but the CLI now
+recognizes the attack affects multiple-targets and applies the multiple
+targets cost multiplier (2x). In the second example, the CLI uses the `--
+targets` numerical value to calculate the cost of the additional hex
+(200/number of current hexes).
 
 Using a single `-- targets` flag for both the multiple targets doubler
 and to calculate the premium for adding a hex seems simpler than having a separate
