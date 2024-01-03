@@ -17,38 +17,32 @@ type errMsg error
 type state int
 
 const (
-	loading state = iota
+	starting state = iota
 	quitting
-	focusRight
+	ready
 )
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
-
-var activeStyle = lipgloss.NewStyle().
-	Border(lipgloss.NormalBorder(), true).
-	BorderForeground(lipgloss.Color("205"))
-
-var inactiveStyle = activeStyle.Copy().
-	Border(lipgloss.HiddenBorder(), true)
-
-var focusKeys = key.NewBinding(
-	key.WithKeys("tab"),
-	key.WithHelp("focus", "press tab to focus"),
+var (
+	listStyle = lipgloss.NewStyle().
+			Margin(1, 2)
+	containerStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder(), true).
+			BorderForeground(lipgloss.Color("205"))
 )
 
 var levelKeys = key.NewBinding(
 	key.WithKeys("1", "2", "3", "4", "5", "6", "7", "8", "9"),
-	key.WithHelp("1–9", "card level"),
+	key.WithHelp("1–9", "card lvl"),
 )
 
 var previousEnhancementKeys = key.NewBinding(
 	key.WithKeys("p", "P"),
-	key.WithHelp("p/P", "num prev enh"),
+	key.WithHelp("p/P", "prev enh"),
 )
 
 var targetKeys = key.NewBinding(
 	key.WithKeys("+", "=", "-"),
-	key.WithHelp("+/-", "num targets"),
+	key.WithHelp("+/-", "cur tgts"),
 )
 
 type model struct {
@@ -115,21 +109,21 @@ func initialModel() model {
 		level:   1,
 		prev:    0,
 		targets: 1,
-		state:   loading,
+		state:   starting,
 	}
 	return m
 }
 
-func (m model) Title() string {
+func (m model) title() string {
 	title := fmt.Sprintf(
-		"Level: %d, Targets: %d, Previous: %d",
+		"Level: %1d, Targets: %2d, Previous: %1d",
 		m.level, m.targets, m.prev,
 	)
 	cost, err := m.cost()
 	if err != nil {
 		return title
 	}
-	return fmt.Sprintf("%s, Cost: %d", title, cost)
+	return fmt.Sprintf("%s, Cost: %3d", title, cost)
 }
 
 func (m model) cost() (ghec.Cost, error) {
@@ -141,10 +135,11 @@ func (m model) cost() (ghec.Cost, error) {
 	if !ok {
 		return ghec.Cost(0), fmt.Errorf("base enhancement not found")
 	}
-	return ghec.NewEnhancement(be).
-		WithLevel(m.level).
-		WithPreviousEnhancements(m.prev).
-		WithMultipleTarget(m.targets).
+	return ghec.NewEnhancement(be,
+		ghec.OptionWithLevel(m.level),
+		ghec.OptionWithMultipleTarget(m.targets),
+		ghec.OptionWithPreviousEnhancements(m.prev),
+	).
 		Cost()
 }
 
@@ -165,6 +160,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.height = msg.Height
 		m.width = msg.Width
+		m.state = ready
 		return m, nil
 
 	case tea.KeyMsg:
@@ -189,13 +185,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.targets = m.targets - 1
 			}
 		}
-		if key.Matches(msg, focusKeys) {
-			if m.state == focusRight {
-				m.state = loading
-			} else {
-				m.state = focusRight
-			}
-		}
 	}
 
 	m.list, cmd = m.list.Update(msg)
@@ -207,55 +196,23 @@ func (m model) View() string {
 	if m.err != nil {
 		return m.err.Error()
 	}
-	w, h := activeStyle.GetFrameSize()
-	frameWidth := (m.width - w) / 2
-	frameHeight := m.height - h
-	w2, h2 := docStyle.GetFrameSize()
-	width := frameWidth - w2
-	height := frameHeight - h2
-	m.list.SetWidth(width)
-	m.list.SetHeight(height)
-	m.list.Title = m.Title()
-	leftContent := docStyle.
-		Width(width).
-		Height(height).
-		Render(m.list.View())
-	cost, _ := m.cost()
-	rightContent := fmt.Sprintf(
-		`
-        m.height: %d, m.width: %d
-     frameHeight: %d, frameWidth: %d
-          height: %d,   width: %d
-         m.level: %d
-          m.prev: %d
-         index(): %d
-    selectedItem: %s
-            Cost: %d
-    `,
-		m.height,
-		m.width,
-		frameHeight,
-		frameWidth,
-		height,
-		width,
-		m.level,
-		m.prev,
-		m.list.Index(),
-		m.list.SelectedItem(),
-		cost,
-	)
+	borderW, borderH := containerStyle.GetFrameSize()
+	containerW := max((m.width-borderW)/2, 80)
+	containerH := m.height - borderH
+	frameH, frameW := listStyle.GetFrameSize()
+	listW := containerW - frameH
+	listH := containerH - frameW
+	m.list.SetWidth(listW)
+	m.list.SetHeight(listH)
+	m.list.Title = m.title()
+	content := listStyle.Render(m.list.View())
 	if m.state == quitting {
-		return leftContent + "\nQuitting"
+		return "\n  Quitting"
 	}
-	var left, right string
-	if m.state == focusRight {
-		left = inactiveStyle.Width(frameWidth).Height(frameHeight).Render(leftContent)
-		right = activeStyle.Width(frameWidth).Height(frameHeight).Render(rightContent)
-	} else {
-		left = activeStyle.Width(frameWidth).Height(frameHeight).Render(leftContent)
-		right = inactiveStyle.Width(frameWidth).Height(frameHeight).Render(rightContent)
-	}
-	return lipgloss.JoinHorizontal(lipgloss.Top, left, right)
+	return containerStyle.
+		Width(containerW).
+		Height(containerH).
+		Render(content)
 }
 
 func Run() {
