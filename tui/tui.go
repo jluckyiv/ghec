@@ -30,9 +30,8 @@ var (
 			BorderForeground(lipgloss.Color("205"))
 )
 
-var quitKeys = key.NewBinding(
-	key.WithKeys("esc", "q"),
-	key.WithHelp("esc/q", "quit"),
+var escKey = key.NewBinding(
+	key.WithKeys("esc"),
 )
 
 var levelKeys = key.NewBinding(
@@ -60,15 +59,18 @@ type model struct {
 	// The key is the list item's FilterValue(), because that's the only
 	// method in the list.Item interface.
 	data map[string]ghec.BaseEnhancement
-	// level is the card level, which affects the enhancement cost.
-	level ghec.Level
-	// prev is the number of previous enhancements on the card, which affects the
-	// enhancement cost.
-	prev ghec.PreviousEnhancements
-	// targets is the current number of targets on the card.
-	// Multiple targets double the enhancement cost and adding a hex applies a
-	// formula based on the number of targets.
-	targets int
+	// modifiers are values that affect the enhancement cost.
+	modifiers struct {
+		// level is the card level, which affects the enhancement cost.
+		level ghec.Level
+		// prev is the number of previous enhancements on the card, which affects the
+		// enhancement cost.
+		prev ghec.PreviousEnhancements
+		// targets is the current number of targets on the card.
+		// Multiple targets double the enhancement cost and adding a hex applies a
+		// formula based on the number of targets.
+		targets int
+	}
 	// state is the current state of the UI.
 	state state
 	// width and height are the current terminal dimensions.
@@ -77,21 +79,10 @@ type model struct {
 }
 
 func initialModel() model {
-	// Get a temporary list of the base enhancements.
-	baseEnhancements := ghec.BaseEnhancements()
-	// Use a map instead of a slice to look up the base enhancement.
-	// Don't use a slice because the Index() method of the list.Model
-	// returns the index of the selected item from the visible items,
-	// not the index from the original list.
-	data := make(map[string]ghec.BaseEnhancement)
-	items := make([]list.Item, len(baseEnhancements))
-	// Assign the base enhancements to the list items and the data map
-	// from the same loop.
-	for i, be := range baseEnhancements {
-		item := newItem(be)
-		items[i] = item
-		data[item.FilterValue()] = baseEnhancements[i]
-	}
+	// Set the initial state.
+	state := starting
+	// Set the list items and the data map.
+	data, items := enhancementsData()
 	// Create the list.Model.
 	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
 	l.AdditionalShortHelpKeys = func() []key.Binding {
@@ -108,21 +99,49 @@ func initialModel() model {
 			targetKeys,
 		}
 	}
-	m := model{
-		list:    l,
-		data:    data,
-		level:   1,
-		prev:    0,
-		targets: 1,
-		state:   starting,
+	// Set the model from the data.
+	m := model{state: state, data: data, list: l}
+	// Set default values for level, targets, and previous enhancements.
+	return m.resetModifiers()
+}
+
+func enhancementsData() (map[string]ghec.BaseEnhancement, []list.Item) {
+	// Get a temporary list of the base enhancements.
+	baseEnhancements := ghec.BaseEnhancements()
+
+	// Use a map instead of a slice to look up the base enhancement.
+	// Don't use a slice because the Index() method of the list.Model
+	// returns the index of the selected item from the visible items,
+	// not the index from the original list.
+	data := make(map[string]ghec.BaseEnhancement)
+	items := make([]list.Item, len(baseEnhancements))
+
+	// Assign the base enhancements to the list items and the data map
+	// from the same loop.
+	for i, be := range baseEnhancements {
+		item := newItem(be)
+		items[i] = item
+		data[item.FilterValue()] = baseEnhancements[i]
 	}
-	return m
+	return data, items
+}
+
+func (m model) level() ghec.Level {
+	return m.modifiers.level
+}
+
+func (m model) targets() int {
+	return m.modifiers.targets
+}
+
+func (m model) prev() ghec.PreviousEnhancements {
+	return m.modifiers.prev
 }
 
 func (m model) title() string {
 	title := fmt.Sprintf(
 		"Level: %1d, Targets: %2d, Previous: %1d",
-		m.level, m.targets, m.prev,
+		m.level(), m.targets(), m.prev(),
 	)
 	cost, err := m.cost()
 	if err != nil {
@@ -141,11 +160,10 @@ func (m model) cost() (ghec.Cost, error) {
 		return ghec.Cost(0), fmt.Errorf("base enhancement not found")
 	}
 	return ghec.NewEnhancement(be,
-		ghec.OptionWithLevel(m.level),
-		ghec.OptionWithMultipleTarget(m.targets),
-		ghec.OptionWithPreviousEnhancements(m.prev),
-	).
-		Cost()
+		ghec.OptionWithLevel(m.level()),
+		ghec.OptionWithMultipleTarget(m.targets()),
+		ghec.OptionWithPreviousEnhancements(m.prev()),
+	).Cost()
 }
 
 func (m model) Init() tea.Cmd {
@@ -153,8 +171,10 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	cmds := []tea.Cmd{}
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 
 	switch msg := msg.(type) {
 
@@ -169,37 +189,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if key.Matches(msg, quitKeys) && !m.list.IsFiltered() {
-			if m.level == 1 && m.targets == 1 && m.prev == 0 {
+		if key.Matches(msg, escKey) && !m.list.IsFiltered() {
+			// If the list is filtered, don't quit the app.
+			// Instead, reset the model and return so the list is not updated.
+			if m.level() == 1 && m.targets() == 1 && m.prev() == 0 {
 				m.state = quitting
 				return m, tea.Quit
 			}
-			m.level = 1
-			m.targets = 1
-			m.prev = 0
-			return m, nil
+			return m.resetModifiers(), nil
 		}
 
 		if key.Matches(msg, levelKeys) {
-			if l, err := strconv.Atoi(msg.String()); err == nil {
-				m.level = ghec.Level(l)
-			}
+			m = m.setCardLevel(msg)
 		}
 		if key.Matches(msg, previousEnhancementKeys) {
-			if msg.String() == "P" {
-				m.prev = ghec.DecrementPrevious(m.prev)
-			}
-			if msg.String() == "p" {
-				m.prev = ghec.IncrementPrevious(m.prev)
-			}
+			m = m.setPreviousEnhancements(msg)
 		}
 		if key.Matches(msg, targetKeys) {
-			if msg.String() == "+" || msg.String() == "=" {
-				m.targets = m.targets + 1
-			}
-			if msg.String() == "-" && m.targets > 1 {
-				m.targets = m.targets - 1
-			}
+			m = m.setCurrentTargets(msg)
 		}
 	}
 
@@ -208,23 +215,63 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
+func (m model) setCurrentTargets(msg tea.KeyMsg) model {
+	if msg.String() == "+" || msg.String() == "=" {
+		m.modifiers.targets = m.modifiers.targets + 1
+	}
+	if msg.String() == "-" && m.modifiers.targets > 1 {
+		m.modifiers.targets = m.modifiers.targets - 1
+	}
+	return m
+}
+
+func (m model) setPreviousEnhancements(msg tea.KeyMsg) model {
+	if msg.String() == "P" {
+		m.modifiers.prev = ghec.DecrementPrevious(m.modifiers.prev)
+	}
+	if msg.String() == "p" {
+		m.modifiers.prev = ghec.IncrementPrevious(m.modifiers.prev)
+	}
+	return m
+}
+
+func (m model) setCardLevel(msg tea.KeyMsg) model {
+	if l, err := strconv.Atoi(msg.String()); err == nil {
+		m.modifiers.level = ghec.Level(l)
+	}
+	return m
+}
+
+func (m model) resetModifiers() model {
+	m.modifiers.level = 1
+	m.modifiers.targets = 1
+	m.modifiers.prev = 0
+	return m
+}
+
 func (m model) View() string {
 	if m.err != nil {
 		return m.err.Error()
 	}
+	if m.state == quitting {
+		return "\n  Quitting"
+	}
+	// Reduce the container size by its borders.
 	borderW, borderH := containerStyle.GetFrameSize()
 	containerW := max((m.width-borderW)/2, 80)
 	containerH := m.height - borderH
+
+	// Reduce the list size by its margins and padding,
+	// plus the container borders.
 	frameH, frameW := listStyle.GetFrameSize()
 	listW := containerW - frameH
 	listH := containerH - frameW
 	m.list.SetWidth(listW)
 	m.list.SetHeight(listH)
+
+	// Set the contents of the list.
 	m.list.Title = m.title()
 	content := listStyle.Render(m.list.View())
-	if m.state == quitting {
-		return "\n  Quitting"
-	}
 	return containerStyle.
 		Width(containerW).
 		Height(containerH).
