@@ -53,12 +53,6 @@ type model struct {
 	err error
 	// list holds a list of items and a delegate for rendering the list.
 	list list.Model
-	// data holds the base enhancements for the list.
-	// Because the list.Model can't return the base enhancement, the
-	// data map is used to look up the base enhancement from the list item.
-	// The key is the list item's FilterValue(), because that's the only
-	// method in the list.Item interface.
-	data map[string]ghec.BaseEnhancement
 	// modifiers are values that affect the enhancement cost.
 	modifiers struct {
 		// level is the card level, which affects the enhancement cost.
@@ -82,7 +76,7 @@ func initialModel() model {
 	// Set the initial state.
 	state := starting
 	// Set the list items and the data map.
-	data, items := enhancementsData()
+	items := enhancementsData()
 	// Create the list.Model.
 	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
 	l.AdditionalShortHelpKeys = func() []key.Binding {
@@ -100,20 +94,15 @@ func initialModel() model {
 		}
 	}
 	// Set the model from the data.
-	m := model{state: state, data: data, list: l}
+	m := model{state: state, list: l}
 	// Set default values for level, targets, and previous enhancements.
 	return m.resetModifiers()
 }
 
-func enhancementsData() (map[string]ghec.BaseEnhancement, []list.Item) {
+func enhancementsData() []list.Item {
 	// Get a temporary list of the base enhancements.
 	baseEnhancements := ghec.BaseEnhancements()
 
-	// Use a map instead of a slice to look up the base enhancement.
-	// Don't use a slice because the Index() method of the list.Model
-	// returns the index of the selected item from the visible items,
-	// not the index from the original list.
-	data := make(map[string]ghec.BaseEnhancement)
 	items := make([]list.Item, len(baseEnhancements))
 
 	// Assign the base enhancements to the list items and the data map
@@ -121,9 +110,8 @@ func enhancementsData() (map[string]ghec.BaseEnhancement, []list.Item) {
 	for i, be := range baseEnhancements {
 		item := newItem(be)
 		items[i] = item
-		data[item.FilterValue()] = baseEnhancements[i]
 	}
-	return data, items
+	return items
 }
 
 func (m model) level() ghec.Level {
@@ -150,15 +138,13 @@ func (m model) title() string {
 	return fmt.Sprintf("%s, Cost: %3d", title, cost)
 }
 
+func (m model) selectedBaseEnhancement() ghec.BaseEnhancement {
+	selected := m.list.SelectedItem().(item)
+	return selected.be
+}
+
 func (m model) cost() (ghec.Cost, error) {
-	selected := m.list.SelectedItem()
-	if selected == nil {
-		return ghec.Cost(0), fmt.Errorf("no base enhancement selected")
-	}
-	be, ok := m.data[selected.FilterValue()]
-	if !ok {
-		return ghec.Cost(0), fmt.Errorf("base enhancement not found")
-	}
+	be := m.selectedBaseEnhancement()
 	return ghec.NewEnhancement(be,
 		ghec.OptionWithLevel(m.level()),
 		ghec.OptionWithMultipleTarget(m.targets()),
